@@ -1,0 +1,598 @@
+<!doctype html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>Crane truck</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/animate.css" />
+    <link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/bootstrap.min.css">
+	<link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/main.css">
+	<link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/style.css">
+ 
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="https://www.google.com/uds/?file=visualization&amp;v=1&amp;hl=fr&amp;packages=corechart&amp;async=2"></script>
+	<link type="text/css" href="https://www.google.com/uds/api/visualization/1.0/ff67c3772da186a412ae3231c32409e9/ui+fr.css" rel="stylesheet">
+	<script type="text/javascript" src="https://www.google.com/uds/api/visualization/1.0/ff67c3772da186a412ae3231c32409e9/format+fr,default+fr,ui+fr,corechart+fr.I.js"></script>
+	<link href="https://ajax.googleapis.com/ajax/static/modules/gviz/1.0/core/tooltip.css" rel="stylesheet" type="text/css">
+		
+	
+</head>
+<body ng-app="cranetruckmonitor">
+
+<div class="bs-component"  ng-controller="CraneTruckController as cranectrl">
+
+	<center>
+	<table><tr><td><h1>Crane Truck</h1></td><td rowspan="2"><img src="pageResource?page=custompage_cranetruck&location=img/cranetruck.jpg" width="150" heigth="150" /></td></tr>
+		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.1</a></td></tr>
+		<tr><td>
+		<div id="showHistory" ng-show="cranectrl.isshowhistory" style="border-width:2px;border-style:ridge;border-color:blue">
+		1.0 First version<br>
+		1.1 Add user management<br>
+		</td></tr>
+		</div>
+	</table>
+	</center>
+
+
+	<!-- process monitor -->
+	<div class="col-lg-12">
+
+	
+	
+	<!-- ---------------------------------------------------- JAAS configuration -->
+	<div class="bs-component">
+		<legend class="text-primary"><span class="glyphicon glyphicon-th"></span>JAAS Configuration</legend>
+			
+		<button ng-click="cranectrl.getDefaultJaasConnection()"  class="btn btn-info btn-xs" >Get example values</button><p>
+
+		<table>
+		<tr>
+			<td>JAAS content:</td>
+			<td><textarea  ng-model="cranectrl.jaas.input.jaascontent"  rows="8" cols="60"></textarea></td>
+			<td><span class="explanation">The content of the JAAS file. You can directly set it here, or give the location of the JAAS file</span></td></tr>
+		</tr><tr>
+			<td>JAAS file:</td>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasfile" size="50" ></td>
+			<td><span class="explanation">The JAAS-STANDARD file</span></td></tr>
+		</tr><tr>
+			<td>Authentication key:</td>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasauthentkey" placeholder="default"></td>
+			<td><span class="explanation">in the JAAS file, you may have multiple key. By default, key should be Autentication-1</span></td></tr>
+		<tr><td colspan="3"><b><i>Try to log using the JAAS configuration</i></b><br><span  class="explanation">Verify the JAAS configuration by logging with a user / password</span></td></tr>
+		</tr><tr>
+			<td>Login:</td>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasusername" ></td>
+			<td><span class="explanation">the login name</span></td></tr>
+		</tr><tr>
+			<td>Password:</td>
+			<td> <input type="checkbox" ng-model="cranectrl.jaas.input.showpassword" title="Show the password" ng-click="cranectrl.showpasswordjaas()">&nbsp;
+			   <input type="{{cranectrl.jaas.input.inputpassword}}" ng-model="cranectrl.jaas.input.jaaspassword" >			   
+			   </td>
+			<td><span class="explanation">The password to check the JAAS configuration</span></td></tr>
+		</tr>
+		</table>
+		<button ng-click="cranectrl.testJaasConnection()"  class="btn btn-info btn-xs" >Test JAAS connection</button><br>
+			{{cranectrl.jaas.inprogress}}<p>
+		<span class="label label-success">{{cranectrl.jaas.status.detailsjsonmap.status}}</span><p>
+		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
+		
+		
+		<span>How to configure the JAAS file ? <a href="" ng-click="cranectrl.jaas.isshowexplanation = ! cranectrl.jaas.isshowexplanation;">Visible</a></td></tr>
+		<div  ng-show="cranectrl.jaas.isshowexplanation" style="border-width:2px;border-style:ridge;border-color:blue">
+		First, create a JAAS file with the content.<br>
+		Second: change the service<br>
+		Third, give the JAAS file:
+		In the studio : open the BonitaBPMSubscription.ini file and add
+		-Dtomcat.extra.params=-Dcom.java.security....<p>
+		In the Tomcat:
+		</div>	
+	</div>
+	<!-- ---------------------------------------------------- JAAS operation -->
+	<!-- userProvider jaasuserprovider / userFilter jaasuserfilter/ authIdentity jaasidentity/ SSL (boolean) jaasuseSSL / UserName jaasopusername/ Password jaasoppassword -->
+	<div class="bs-component">
+		<legend class="text-primary"><span class="glyphicon glyphicon-th"></span>JAAS Detail operation</legend>
+		<span class="explanation">Specify each component of the JAAS file, and then this tool will play step by step each operation the com.sun.security.auth.module.LdapLoginModule play</span>
+		<p>
+		<button ng-click="cranectrl.getDefaultLdaploginmoduleConnection()"  class="btn btn-info btn-xs" >Get example values</button><p>
+
+		<table>
+		<tr>
+			<td>Url (userProvider):</td>
+			<td><input  ng-model="cranectrl.ldaploginmodule.input.userProvider"  size="50"></td>
+			<td><span class="explanation">The attribute urlProvider of the LdapLoginModule. Connection to the LDAP database, and the root hierarchy</span></td></tr>
+		</tr><tr>
+			<td>user Filter (userFilter):</td>
+			<td><input  ng-model="cranectrl.ldaploginmodule.input.userFilter"  size="50"></td>
+			<td><span class="explanation">The attribute userFilter of the LdapLoginModule. How the user can be found in the hierarchy ?</span></td></tr>
+		</tr><tr>
+			<td>Identity (authIdentity):</td>
+			<td><input  ng-model="cranectrl.ldaploginmodule.input.authIdentity"  size="50"></td>
+			<td><span class="explanation">The attribute authIdentity of the LdapLoginModule. May be empty</span></td></tr>
+		</tr><tr>
+			<td>Use SSL (useSSL):</td>
+			<td><input  ng-model="cranectrl.ldaploginmodule.input.useSSL"  size="50"></td>
+			<td><span class="explanation">SSL protocol should be used ? </span></td></tr>
+		</tr><tr>
+			<td>Login:</td>
+			<td><input  ng-model="cranectrl.ldaploginmodule.input.login"  size="50"></td>
+			<td><span class="explanation">To verify the different parameters, a login is run</span></td></tr>
+		</tr><tr>
+			<td>Password:</td>
+			<td><input type="checkbox" ng-model="cranectrl.ldaploginmodule.input.showpassword" title="Show the password" ng-click="cranectrl.showpasswordldaploginmodule()">&nbsp; 
+			<input type="{{cranectrl.ldaploginmodule.input.inputpassword}}" ng-model="cranectrl.ldaploginmodule.input.password"  size="50"></td>
+			</tr>
+		</table>
+		<button ng-click="cranectrl.testLdaploginmodule()"  class="btn btn-info btn-xs" >Test LdapLoginModule parameters</button><br>
+			{{cranectrl.ldaploginmodule.inprogress}}<p>
+			
+			<table style="border:10px">
+			<tr >
+			<td style="vertical-align: top;width:200px"">
+				<span class="label label-success">{{cranectrl.ldaploginmodule.status.connection}}</span><p>
+				<span class="label label-danger">{{cranectrl.ldaploginmodule.status.error}}</span><p>
+			</td>
+			<td>
+			  Details:<p>
+					<!-- <p ng-bind-html="cranectrl.oneevent"></p> -->
+				<div ng-bind-html="cranectrl.getListEvents(cranectrl.ldaploginmodule.status.listeventshtml )"></div>
+					<!-- 
+				<table style="border:1"> <tr ng-repeat="event in cranectrl.ldaploginmodule.status.events  track by $index">
+					<td>
+						<div ng-show="event.level == 'INFO'">
+							<button class="btn btn-xs btn-info" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						<div ng-show="event.level == 'APPLICATIONERROR'">
+							<button class="btn btn-xs  btn-warning" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						<div ng-show="event.level == 'ERROR'">
+							<button class="btn btn-xs  btn-danger" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						
+						{{event.cause}} {{event.parameters}}<br>
+						{{event.action}}
+					</td>			
+					<tr>
+				</table>
+				-->
+				</td>
+			</tr>
+			</table>
+	</div>
+	
+	<!-- ---------------------------------------------------- LDAP Synchronize operation -->
+	<div class="bs-component">
+		<legend class="text-primary"><span class="glyphicon glyphicon-th"></span>JAAS Environment</legend>
+		
+		Use this JAAS file: <input type="text" ng-model="cranectrl.jaasenvironment.input.jaasfile" size="70"><p>
+		<span class="explanation">Leave this input empty to retrieve the Environement Variable java.security.auth.login.config</span><p>
+			
+		<button class="btn btn-xs  btn-info" ng-click="cranectrl.getJaasEnvironment()" >Get Jaas Information</button><br>
+		
+		<span class="label label-success">{{cranectrl.jaasenvironment.status.info}}</span><p>
+		<span class="label label-danger">{{cranectrl.jaasenvironment.status.error}}</span><p>
+			
+		
+		Jaas File : {{cranectrl.jaasenvironment.status.variable}}<P>
+		Jaas Content : <br>
+		<textarea  ng-model="cranectrl.jaasenvironment.status.detailsjsonmap.jaascontent" readonly rows="8" cols="60"></textarea>
+		<!-- event -->
+
+	    <div ng-bind-html="cranectrl.getListEvents( cranectrl.jaasenvironment.status.listeventshtml )"></div>
+
+
+		<!-- 
+		<table style="border:1"> <tr ng-repeat="event in cranectrl.jaasenvironment.status.events  track by $index">
+					<td>
+						<div ng-show="event.level == 'INFO'">
+							<button class="btn btn-xs btn-info" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						<div ng-show="event.level == 'APPLICATIONERROR'">
+							<button class="btn btn-xs  btn-warning" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						<div ng-show="event.level == 'ERROR'">
+							<button class="btn btn-xs  btn-danger" title="{{event.key}}" >{{event.title}}</button><br>
+						</div>
+						
+						{{event.cause}} {{event.parameters}}<br>
+						{{event.action}}
+					</td>			
+					<tr>
+				</table>	
+				 -->			
+	</div>
+	<!-- ---------------------------------------------------- LDAP Synchronize operation -->
+	<div class="bs-component">
+		<legend class="text-primary"><span class="glyphicon glyphicon-th"></span>LDAP Synchronizer</legend>
+		<table>
+		<tr><td>Path LdapSynchronizer configuration:</td><td><input type="text" ng-model="cranectrl.ldapSynchronizerPath" placeholder="c:/program file/LdapSynchronizer/conf/default" size="100"></td><tr>
+		<tr><td>Tenant Id:</td><td> <input type="text" ng-model="cranectrl.domain" placeholder="default"></td><tr>
+		<tr><td colspan="2"><button ng-click="cranectrl.readProperties()"  class="btn btn-info btn-xs" >Load from configuration</button>
+		<button ng-click="cranectrl.writeProperties()"  class="btn btn-info btn-xs" >Save configuration</button></td><tr>
+		<tr><td colspan="2">
+			<span class="label label-success">{{cranectrl.status.properties.status}}</span><p>
+			<span class="label label-danger">{{cranectrl.status.properties.error}}</span><p>
+		</td></tr>
+		
+		<tr><td colspan="2">
+			<button ng-click="cranectrl.testAllConfiguration()"  class="btn btn-info btn-xs" >Test All configuration</button></td><tr>
+		</table>
+		<span class="label label-success">{{cranectrl.alltests.status}}</span><p>
+		<span class="label label-danger">{{cranectrl.alltests.statuserror}}</span><p>
+
+	
+		<!-- ---------------------------------------------------- LDAP connection -->
+		<table width="100%" style="margin-top: 15px;margin-bottom:5px">
+			<tr style="background-color:#18bc9c;font-size:15px;font-weight: bold;line-height: 1;color: #ffffff;">
+			<td>
+				<input type="checkbox" ng-model="cranectrl.display.ldapconnection"></input>LDAP Connection
+			</td></tr>
+		</table>
+				
+		<div ng-show="cranectrl.display.ldapconnection">
+			<span class="explanation">properties files ldap.properties</span>
+			<button ng-click="cranectrl.getDefaultLdapConnection()"  class="btn btn-info btn-xs" >Get Default values</button><p>
+			
+			<table>
+			<tr><td>Host</td><td><input type="text" ng-model="cranectrl.data.ldap.hosturl" placeholder="ldap://localhost:10389" size="35"></td>
+				<td><span class="explanation">Connection to your LDAP directory. Contains the host and the port</span></td></tr>
+				
+			<tr><td>Authentication Type</td><td><input type="text" ng-model="cranectrl.data.ldap.authtype" placeholder="simple"></td>
+				<td><span class="explanation">Different way to connect the LDAP directory. Use 'simple'</span></td></tr>
+			<tr><td>Principal DN</td><td><input type="text" ng-model="cranectrl.data.ldap.principaldn" placeholder="uid=admin, ou=system" size="35"></td>
+				<td><span class="explanation">In a LDAP directory, you connect with a user/password. This is the user name, as a LDAP form</span></td></tr>
+			<tr><td>Password</td><td><input type="text" ng-model="cranectrl.data.ldap.password" placeholder="secret"></td>
+				<td><span class="explanation">The password of the LDAP user</span></td></tr></tr>
+			<tr><td>Directory user type</td><td><input type="text" ng-model="cranectrl.data.ldap.directory_user_type" placeholder="person"></td>
+				<td><span class="explanation">use 'person' for LDAP, 'user' for ActiveDirectory</span></td></tr></tr>
+			<tr><td>Paged</td><td><select ng-model="cranectrl.data.ldap.used_paged_search_list" placeholder=""  ng-options="option.name for option in cranectrl.truefalse"></td>
+				<td><span  class="explanation">When your directory is big (more than 1000 entries), it's better to synchronize page per page</span></td></tr></tr>
+			
+			<tr><td>Size of page</td><td><input type="number" ng-model="cranectrl.data.ldap.pagesize" placeholder="1000"></td>
+				<td><span  class="explanation">The size of one page</span></td></tr></tr>
+				
+			<tr><td colspan="3"><b><i>Run a simple search</i></b><br><span  class="explanation">Verify the search activity by running a simple search in the directory</span></td></tr>
+			
+			<tr><td>SearchDN</td><td><input type="text" ng-model="cranectrl.data.ldap.searchdn" placeholder="dc=example,dc=com" size="35"></td>
+				<td><span class="explanation">Give a hierarchy where the search starts</span></td></tr></tr>
+			<tr><td>SearchFilter</td><td><input type="text" ng-model="cranectrl.data.ldap.searchfilter" placeholder="uid=walter.bates" size="35"></td>
+				<td><span class="explanation">Give a filter base on attributes</span></td></tr></tr>
+			</table>
+			<button ng-click="cranectrl.testLdapConnection()"  class="btn btn-info btn-xs" >Test Ldap Connection</button><p>
+			{{cranectrl.statusldap.inprogress}}<p>
+			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.connection}}</span><p>
+			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.search}}</span><p>
+			<span class="label label-danger">{{cranectrl.statusldap.detailsjsonmap.error}}</span><p>
+
+			
+			</table>
+			<table class="table table-hover table-condensed table-bordered">
+			<tr>
+				<th>uid</th>
+				<th>sn</th>
+				<th>cn</th>
+				<th>givenName</th>
+				<th>record</th>
+			</tr>
+			<tr ng-repeat="oneresult in cranectrl.statusldap.detailsjsonmap.searchlist  track by $index">
+			  <td>{{oneresult.uid}}</td>
+			  <td>{{oneresult.sn}}</td>
+			  <td>{{oneresult.cn}}</td>
+			  <td>{{oneresult.givenName}}</td>
+			  <td>{{oneresult}}</td>
+			  
+			 </tr>
+			 </table>
+		</div>
+		<!-- ---------------------------------------------------- Bonita connection -->
+		<table width="100%" style="margin-top: 15px;margin-bottom:5px">
+			<tr style="background-color:#18bc9c;font-size:15px;font-weight: bold;line-height: 1;color: #ffffff;">
+			<td>
+				<input type="checkbox" ng-model="cranectrl.display.bonitaconnection"></input>Bonita Connection
+			</td></tr>
+		</table>
+				 
+		<div ng-show="cranectrl.display.bonitaconnection">
+		
+			<span class="explanation">properties files bonita.properties</span>
+		
+			<button ng-click="cranectrl.getDefaultBonitaConnection()"  class="btn btn-info btn-xs" >Get default values</button><p>
+
+			<table>
+				<tr><td>BonitaHome</td><td><input type="text" ng-model="cranectrl.data.bonita.bonitahome" placeholder="c:/program file/bonita/bonitahome" size="100"></td>
+					<td><span class="explanation">The path to the Bonita Home</span></td></tr>
+				<tr><td>Domain</td><td><input type="text" ng-model="cranectrl.data.bonita.domain" placeholder="c:/program file/bonita/bonitahome" size="35"></td>
+					<td><span class="explanation">The path to the Bonita Home</span></td></tr>
+				<tr><td>login</td><td><input type="text" ng-model="cranectrl.data.bonita.login" placeholder="walter.bates" size="35"></td>
+					<td><span class="explanation">Technical user of the <b>tenant</b> (install)</span></td></tr>
+				<tr><td>password</td><td><input type="text" ng-model="cranectrl.data.bonita.password" placeholder="bpm" size="35"></td>
+					<td><span class="explanation">The password of the user</span></td></tr>
+				<tr><td>technicalUser</td><td><input type="text" ng-model="cranectrl.data.bonita.technicaluser" placeholder="platformAdmin" size="35"></td>
+					<td><span class="explanation">The technical user of the <b>platform</b> (platformAdmin)</span></td></tr>
+				<tr><td>technicalPassword</td><td><input type="text" ng-model="cranectrl.data.bonita.technicalpassword" placeholder="platform" size="35"></td>
+					<td><span class="explanation">The password of the technical user of the platform</span></td></tr>
+			</table>
+
+			
+			<button ng-click="cranectrl.testBonitaConnection()"  class="btn btn-info btn-xs" >Test Bonita Login</button><p>
+			{{cranectrl.statusbonita.inprogress}}<p>
+			<span class="label label-success">{{cranectrl.statusbonita.connectionstatus}}</span><p>
+			<span class="label label-danger">{{cranectrl.statusbonita.connectionstatuserror}}</span><p>
+
+
+		</div>
+		
+		<!-- ---------------------------------------------------- Logger  -->
+		<table width="100%" style="margin-top: 15px;margin-bottom:5px">
+			<tr style="background-color:#18bc9c;font-size:15px;font-weight: bold;line-height: 1;color: #ffffff;">
+			<td>
+				<input type="checkbox" ng-model="cranectrl.display.logger"></input>Logger
+			</td></tr>
+		</table>
+		<div ng-show="cranectrl.display.logger">
+		
+			<span class="explanation">properties files sync.properties</span><p>
+			<table>
+			<tr>
+			<td>Log dir path</td><td><input ng-model="cranectrl.data.logger.log_dir_path" title="property attribute: log_dir_path" size="80"></td></tr>
+			<td>Log file date prefixe (example yyyy-MM-dd)</td><td><input ng-model="cranectrl.data.logger.log_file_date_prefix" title="property attribute: log_file_date_prefix" size="30"></td></tr>
+			<td>log level</td><td><select ng-model="cranectrl.data.logger.log_level_list" 
+							title="property attribute: log_level"
+						ng-options="option.name for option in cranectrl.errorslevel"
+						title="property attribute: log_file_date_prefix">
+						</td></tr>
+						
+			</table>
+			
+		</div>
+	
+		<!-- ---------------------------------------------------- Synchronize  -->
+		<table width="100%" style="margin-top: 15px;margin-bottom:5px">
+			<tr style="background-color:#18bc9c;font-size:15px;font-weight: bold;line-height: 1;color: #ffffff;">
+			<td>
+				<input type="checkbox" ng-model="cranectrl.display.synchronize"></input>Synchronize
+			</td></tr>
+		</table>
+		<div ng-show="cranectrl.display.synchronize">
+		
+			<span class="explanation">properties files sync.properties</span><p>
+			
+
+			<h3>Watch directory</h3>
+			<table  class="table table-hover table-condensed table-bordered">
+				<tr>
+					<th>Name</th>	
+					<th>Search DN</th>
+					<th>Search filter</th>
+				</tr>
+				<tr ng-repeat="onedir in cranectrl.data.sync.ldap_watched_directories track by $index">
+					<td><a href="" ng-click="cranectrl.list_remove(cranectrl.data.sync.ldap_watched_directories, onedir.name, 'dir')" title="remove"><span class="glyphicon glyphicon-remove"></a>&nbsp;{{onedir.name}}</a></td>
+					<td><input ng-model="onedir.ldap_search_dn" size="45" title="property attribute: <dirid>.ldap_search_dn"></td>
+					<td><input ng-model="onedir.ldap_search_filter" size="45"></td>
+				</tr>
+				<tr><td colspan="3">
+					<button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_watched_directories, 'dir',{})">Add</button>
+					&nbsp;&nbsp;
+					<button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_watched_directories,'dir', {ldap_search_dn:'ou=people,dc=bonita,dc=com',ldap_search_filter:'cn=*'})">Add example</button>
+
+				</td></tr>
+			</table>
+			
+			
+			<!-- users-->
+			<h3>Users</h3>
+			<table  class=" table-hover table-condensed ">
+				<tr>
+					<td>Error level:</td>
+					<td><select ng-model="cranectrl.data.sync.error_level_upon_failing_to_get_related_user_list" 
+							title="property attribute: error_level_upon_failing_to_get_related_user"
+						ng-options="option.name for option in cranectrl.errorslevel"/>
+					</td>
+				</tr><tr>
+					<td>User name case of the Bonita imported users</td>
+					<td><select ng-model="cranectrl.data.sync.bonita_username_case_list" 
+								title="property attribute: bonita_username_case"
+							ng-options="option.name for option in cranectrl.lowerupper">							
+							</td>
+				</tr><tr>
+					<td>Bonita users who should not be synchronized (user names separated by commas)</td>
+					<td><input ng-model="cranectrl.data.sync.bonita_nosync_users" 
+								title="property attribute: bonita_nosync_users" size="50"></td>
+				</tr><tr>
+					<td>Specifies whether the tool should deactivate Bonita users which are not present in LDAP</td>
+					<td><select ng-model="cranectrl.data.sync.bonita_deactivate_users_list" 
+								title="property attribute: bonita_deactivate_users"
+							ng-options="option.name for option in cranectrl.truefalse"></td>
+				</tr><tr>
+					<td>Specify the role that will be affected to Bonita users</td>
+					<td><input ng-model="cranectrl.data.sync.bonita_user_role" title="property attribute: bonita_user_role" size="40">
+						<!--
+						<select ng-model="cranectrl.data.sync.bonita_user_role_list" 
+									title="property attribute: bonita_user_role"
+								ng-options="option.name for option in cranectrl.rolelist"> -->
+					</td>
+				</tr>
+			</table>
+			<!-- group -->
+			<h3>Groups</h3>
+			<table><tr><td>
+			Allow recursive <select ng-model="cranectrl.data.sync.allow_recursive_groups_list" 
+								title="property attribute: allow_recursive_groups"
+							ng-options="option.name for option in cranectrl.truefalse">
+							{{cranectrl.data.sync.allow_recursive_groups}}
+			</td></tr></table>
+			<b>Group by hierarchy</b>	
+			<table  class="table table-hover table-condensed table-bordered">
+				<tr>
+					<th>Name</th>	
+					<th>Group_DN</th>
+					<th>Forced group name</th>
+
+				</tr>
+				<tr ng-repeat="onedir in cranectrl.data.sync.ldap_groups track by $index">
+					<td><a href="" ng-click="cranectrl.list_remove(cranectrl.data.sync.ldap_groups, onedir.name,'group')" title="remove"><span class="glyphicon glyphicon-remove"></a>&nbsp;{{onedir.name}}</a></td>
+					<td><input ng-model="onedir.ldap_group_dn" size="45" title="property attribute: <groupid>.ldap_group_dn"></td>
+					<td><input ng-model="onedir.forced_bonita_group_name" title="property attribute: <groupid>.forced_bonita_group_name" size="45"></td>
+				</tr>
+				<tr><td colspan="3"><button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_groups,'group',{})">Add</button>
+					&nbsp;&nbsp;<button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_groups,'group', {ldap_group_dn:'cn=quality,ou=groups,dc=bonita,dc=com',forced_bonita_group_name:'Quality user',force_add_non_existing_users:false})">Add example</button>
+				</td></tr>
+			</table>
+
+			<b>Group by Search</b>	
+			<table  class="table table-hover table-condensed table-bordered">
+				<tr>
+					<th>Name</th>	
+					<th>Search DN</th>
+					<th>Search Filter</th>
+				</tr>
+				<tr ng-repeat="onedir in cranectrl.data.sync.ldap_searchs track by $index">
+					<td><a href="" ng-click="cranectrl.list_remove(cranectrl.data.sync.ldap_searchs, onedir.name,'search')" title="remove"><span class="glyphicon glyphicon-remove"></a>&nbsp;{{onedir.name}}</a></td>
+					<td><input ng-model="onedir.ldap_search_dn" size="45" title="property attribute: <searchid>.ldap_search_dn"></td>
+					<td><input ng-model="onedir.ldap_search_filter" title="property attribute: <searchid>.ldap_search_filter" size="45"></td>
+				</tr>
+				<tr><td colspan="3">
+					<button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_searchs,'search',{})">Add</button>
+					&nbsp;&nbsp;
+					<button ng-click="cranectrl.list_add(cranectrl.data.sync.ldap_searchs,'search', {ldap_search_dn:'ou=people,dc=bonita,dc=com',ldap_search_filter:'A_*'})">Add example</button>
+
+				</td></tr>
+			</table>
+
+			<h3>Tests</h3>
+				
+			<button ng-click="cranectrl.testSynchronize()" class="btn btn-info btn-xs">Test Directory Setting</button>
+			{{cranectrl.synctest.inprogress}}<p>
+			<span class="label label-success">{{cranectrl.synctest.status}}</span><p>
+			<span class="label label-danger">{{cranectrl.synctest.statuserror}}</span><p>
+			Watch Directory test
+			<table class="table table-hover table-condensed table-bordered">
+			<tr>
+				<th>Test</th>
+				<th>Nb record</th>
+				<th>Status</th>
+			</tr>
+			<tr ng-repeat="oneresult in cranectrl.synctest.detailsjsonmap.watchdirectories  track by $index">
+			  <td>{{oneresult.name}}</td>
+			  <td>{{oneresult.size}}</td>
+			  <td>
+				Error: {{oneresult.error}}
+				One Record {{oneresult.example.user_name}}
+			  </td>
+			 </tr>
+			 </table>
+		
+		</div>
+		<!-- ---------------------------------------------------- Mapper  -->
+		<table width="100%" style="margin-top: 15px;margin-bottom:5px">
+			<tr style="background-color:#18bc9c;font-size:15px;font-weight: bold;line-height: 1;color: #ffffff;">
+			<td>
+				<input type="checkbox" ng-model="cranectrl.display.mapper"></input>Mapper
+			</td></tr>
+		</table>
+		<div ng-show="cranectrl.display.mapper">
+			<span class="explanation">properties files mapper.properties</span><p>
+			
+			<table  class="table table-hover table-condensed table-bordered">
+				<tr>
+					<th>Bonita attribut</th>	
+					<th>Ldap attributes</th>
+					<th>Example</th>
+				</tr>
+				<tr ng-repeat="oneitem in cranectrl.data.mapper.listattributes track by $index">
+					<td>{{oneitem.b}}</td>
+					<td><input ng-model="oneitem.l" size="45" ></td>
+					<td><i>{{oneitem.e}}</i></td>
+				</tr>
+			</table>
+			<button ng-click="cranectrl.testMapper()" class="btn btn-info btn-xs">Test Mapper</button>
+			<span class="label label-success">{{cranectrl.mappertest.status}}</span><p>
+			<span class="label label-danger">{{cranectrl.mappertest.statuserror}}</span><p>
+
+	
+			
+		</div>
+
+	</div>	
+
+	<!-- ---------------------------------------------------- Users managements -->
+	<div class="bs-component">
+		<legend class="text-primary"><span class="glyphicon glyphicon-th"></span>Users Management</legend>
+		
+		<table>
+			<tr><td>Max user to display</td><td><input ng-model="cranectrl.listusers.input.maxtodisplay" ></td></tr>
+			<tr><td>Filter on user Name </td><td><input ng-model="cranectrl.listusers.input.filteruser" ></td></tr>
+		</table>
+		<button ng-click="cranectrl.getListUsers()"  class="btn btn-info btn-xs" >Get Users </button><p>
+		<span class="label label-success">{{cranectrl.listusers.status.inprogressgetuser}}</span><p>
+
+		<table  class="table table-hover table-condensed table-bordered">
+				<tr>
+					<th>User Name</th>	
+					<th>First Name</th>
+					<th>LastName</th>
+					<th>State</th>
+				</tr>
+				<tr ng-repeat="oneitem in cranectrl.listusers.list track by $index">
+					<td>{{oneitem.username}}</td>
+					<td>{{oneitem.firstname}}</td>
+					<td>{{oneitem.lastname}}</td>
+					<td>{{oneitem.enable}}</td>
+				</tr>
+			</table>
+		<span class="label label-primary">Total of users {{cranectrl.listusers.totalusers}}</span>
+		<table>
+			<tr><td>Scope:</td><td><select ng-model="cranectrl.listusers.input.scopeselect" 
+						ng-options="option.name for option in cranectrl.listusers.scopechoice"/>
+						</td></tr>
+		</table>
+		
+		Nota: all operations exclude myself (if you click on Delete, you don't delete yourself for example) 
+		<table >
+			<tr><td style="padding: 0px 5px 50px 5px;">
+			<button ng-click="cranectrl.listUsersDoOperation('ENABLE')" class="btn btn-success btn-xs">Enable</button>
+			</td><td style="padding: 0px 5px 50px 5px;">
+			<button ng-click="cranectrl.listUsersDoOperation('DISABLE')" class="btn btn-warning btn-xs">Disable</button>
+			</td><td style="padding: 0px 5px 50px 5px;">
+			<button ng-click="cranectrl.listUsersDoOperation('DELETE')" class="btn btn-danger btn-xs">Delete</button>
+			</td></tr>
+		</table>
+		<p>
+		<span class="label label-success">{{cranectrl.listusers.status.info}}</span><p>
+		<span class="label label-danger">{{cranectrl.listusers.status.error}}</span><p>
+		<div ng-bind-html="cranectrl.getListEvents(cranectrl.listusers.status.listeventshtml )"></div>
+		
+
+	</div>
+			
+</div>
+
+
+
+<!-- Third party dependencies -->
+
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/jquery.min.js"></script>
+
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular.min.js"></script>
+
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-resource.min.js"></script>
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-cookies.min.js"></script>
+
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/bootstrap/js/bootstrap.min.js"></script>
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-bootstrap-tpls.min.js"></script>
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-file-upload.js"></script> 
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/ng-google-chart.js"></script> 
+<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-sanitize.min.js"></script>
+
+<!-- Application dependencies -->
+<script src="pageResource?page=custompage_cranetruck&location=cranetruckmonitor.js"></script>
+
+</body>
+</html>		
