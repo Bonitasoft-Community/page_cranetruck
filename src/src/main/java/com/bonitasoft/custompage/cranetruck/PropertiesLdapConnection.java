@@ -59,7 +59,7 @@ public class PropertiesLdapConnection implements PropertiesParam {
         mStatusOperation.mStatusError = "";
 
         if (mHostURL == null) {
-            mStatusOperation.mStatusError += "HostUrl is mandatory";
+            mStatusOperation.mStatusError += "LdapConnection : Host is mandatory";
         }
 
         return mStatusOperation;

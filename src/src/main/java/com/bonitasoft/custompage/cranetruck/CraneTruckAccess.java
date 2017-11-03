@@ -79,7 +79,7 @@ public class CraneTruckAccess {
         statusOperationCollector.addStatusOperation(propertiesParam.getStatusOperation());
         result.put("mapper", propertiesParam.toMap());
 
-        result.put("statuserror", statusOperationCollector.mStatusError);
+        result.put("error", statusOperationCollector.mStatusError);
         if (statusOperationCollector.mStatusError.length() == 0 && statusOperationCollector.mStatusinfo.length() == 0) {
             statusOperationCollector.mStatusinfo = "OK";
         }

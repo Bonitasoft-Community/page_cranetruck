@@ -31,11 +31,12 @@
 
 	<center>
 	<table><tr><td><h1>Crane Truck</h1></td><td rowspan="2"><img src="pageResource?page=custompage_cranetruck&location=img/cranetruck.jpg" width="150" heigth="150" /></td></tr>
-		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.1</a></td></tr>
+		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.2</a></td></tr>
 		<tr><td>
 		<div id="showHistory" ng-show="cranectrl.isshowhistory" style="border-width:2px;border-style:ridge;border-color:blue">
 		1.0 First version<br>
 		1.1 Add user management<br>
+		1.2 Ready 7.5<br>
 		</td></tr>
 		</div>
 	</table>
@@ -80,7 +81,7 @@
 		</tr>
 		</table>
 		<button ng-click="cranectrl.testJaasConnection()"  class="btn btn-info btn-xs" >Test JAAS connection</button><br>
-			{{cranectrl.jaas.inprogress}}<p>
+		<span class="label label-success">{{cranectrl.jaas.inprogress}}</span><p>
 		<span class="label label-success">{{cranectrl.jaas.status.detailsjsonmap.status}}</span><p>
 		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
 		
@@ -131,7 +132,7 @@
 			</tr>
 		</table>
 		<button ng-click="cranectrl.testLdaploginmodule()"  class="btn btn-info btn-xs" >Test LdapLoginModule parameters</button><br>
-			{{cranectrl.ldaploginmodule.inprogress}}<p>
+			<span class="label label-success">{{cranectrl.ldaploginmodule.inprogress}}</span><p>
 			
 			<table style="border:10px">
 			<tr >
@@ -221,11 +222,14 @@
 			<span class="label label-danger">{{cranectrl.status.properties.error}}</span><p>
 		</td></tr>
 		
+		<!-- 
 		<tr><td colspan="2">
-			<button ng-click="cranectrl.testAllConfiguration()"  class="btn btn-info btn-xs" >Test All configuration</button></td><tr>
+			<button ng-click="cranectrl.testAllConfiguration()"  class="btn btn-info btn-xs" >Test All configuration</button></td>
+		<tr>
+		 -->
 		</table>
 		<span class="label label-success">{{cranectrl.alltests.status}}</span><p>
-		<span class="label label-danger">{{cranectrl.alltests.statuserror}}</span><p>
+		<span class="label label-danger">{{cranectrl.alltests.error}}</span><p>
 
 	
 		<!-- ---------------------------------------------------- LDAP connection -->
@@ -265,8 +269,8 @@
 			<tr><td>SearchFilter</td><td><input type="text" ng-model="cranectrl.data.ldap.searchfilter" placeholder="uid=walter.bates" size="35"></td>
 				<td><span class="explanation">Give a filter base on attributes</span></td></tr></tr>
 			</table>
-			<button ng-click="cranectrl.testLdapConnection()"  class="btn btn-info btn-xs" >Test Ldap Connection</button><p>
-			{{cranectrl.statusldap.inprogress}}<p>
+			<button ng-click="cranectrl.testLdapConnection()"  class="btn btn-info btn-xs" >Test Ldap Connection</button><br>
+			<span class="label label-success">{{cranectrl.statusldap.inprogress}}</span><p>
 			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.connection}}</span><p>
 			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.search}}</span><p>
 			<span class="label label-danger">{{cranectrl.statusldap.detailsjsonmap.error}}</span><p>
@@ -308,8 +312,8 @@
 			<table>
 				<tr><td>BonitaHome</td><td><input type="text" ng-model="cranectrl.data.bonita.bonitahome" placeholder="c:/program file/bonita/bonitahome" size="100"></td>
 					<td><span class="explanation">The path to the Bonita Home</span></td></tr>
-				<tr><td>Domain</td><td><input type="text" ng-model="cranectrl.data.bonita.domain" placeholder="c:/program file/bonita/bonitahome" size="35"></td>
-					<td><span class="explanation">The path to the Bonita Home</span></td></tr>
+				<tr><td>Domain (tenant)</td><td><input type="text" ng-model="cranectrl.data.bonita.domain" placeholder="default" size="35"></td>
+					<td><span class="explanation">The Domain, equals to the TenantId</span></td></tr>
 				<tr><td>login</td><td><input type="text" ng-model="cranectrl.data.bonita.login" placeholder="walter.bates" size="35"></td>
 					<td><span class="explanation">Technical user of the <b>tenant</b> (install)</span></td></tr>
 				<tr><td>password</td><td><input type="text" ng-model="cranectrl.data.bonita.password" placeholder="bpm" size="35"></td>
@@ -321,10 +325,10 @@
 			</table>
 
 			
-			<button ng-click="cranectrl.testBonitaConnection()"  class="btn btn-info btn-xs" >Test Bonita Login</button><p>
-			{{cranectrl.statusbonita.inprogress}}<p>
-			<span class="label label-success">{{cranectrl.statusbonita.connectionstatus}}</span><p>
-			<span class="label label-danger">{{cranectrl.statusbonita.connectionstatuserror}}</span><p>
+			<button ng-click="cranectrl.testBonitaConnection()"  class="btn btn-info btn-xs" >Test Bonita Login</button><br>
+			<span class="label label-success">{{cranectrl.statusbonita.inprogress}}</span><p>
+			<span class="label label-success">{{cranectrl.statusbonita.info}}</span><p>
+			<span class="label label-danger">{{cranectrl.statusbonita.error}}</span><p>
 
 
 		</div>
@@ -468,10 +472,10 @@
 
 			<h3>Tests</h3>
 				
-			<button ng-click="cranectrl.testSynchronize()" class="btn btn-info btn-xs">Test Directory Setting</button>
-			{{cranectrl.synctest.inprogress}}<p>
+			<button ng-click="cranectrl.testSynchronize()" class="btn btn-info btn-xs">Test Directory Setting</button><br>
+			<span class="label label-success">{{cranectrl.synctest.inprogress}}</span><p>
 			<span class="label label-success">{{cranectrl.synctest.status}}</span><p>
-			<span class="label label-danger">{{cranectrl.synctest.statuserror}}</span><p>
+			<span class="label label-danger">{{cranectrl.synctest.error}}</span><p>
 			Watch Directory test
 			<table class="table table-hover table-condensed table-bordered">
 			<tr>
@@ -512,9 +516,9 @@
 					<td><i>{{oneitem.e}}</i></td>
 				</tr>
 			</table>
-			<button ng-click="cranectrl.testMapper()" class="btn btn-info btn-xs">Test Mapper</button>
+			<!-- <button ng-click="cranectrl.testMapper()" class="btn btn-info btn-xs">Test Mapper</button> -->
 			<span class="label label-success">{{cranectrl.mappertest.status}}</span><p>
-			<span class="label label-danger">{{cranectrl.mappertest.statuserror}}</span><p>
+			<span class="label label-danger">{{cranectrl.mappertest.error}}</span><p>
 
 	
 			
@@ -530,7 +534,7 @@
 			<tr><td>Max user to display</td><td><input ng-model="cranectrl.listusers.input.maxtodisplay" ></td></tr>
 			<tr><td>Filter on user Name </td><td><input ng-model="cranectrl.listusers.input.filteruser" ></td></tr>
 		</table>
-		<button ng-click="cranectrl.getListUsers()"  class="btn btn-info btn-xs" >Get Users </button><p>
+		<button ng-click="cranectrl.getListUsers()"  class="btn btn-info btn-xs" >Get Users </button><br>
 		<span class="label label-success">{{cranectrl.listusers.status.inprogressgetuser}}</span><p>
 
 		<table  class="table table-hover table-condensed table-bordered">
@@ -548,13 +552,14 @@
 				</tr>
 			</table>
 		<span class="label label-primary">Total of users {{cranectrl.listusers.totalusers}}</span>
+		<!-- 
 		<table>
 			<tr><td>Scope:</td><td><select ng-model="cranectrl.listusers.input.scopeselect" 
 						ng-options="option.name for option in cranectrl.listusers.scopechoice"/>
 						</td></tr>
 		</table>
-		
-		Nota: all operations exclude myself (if you click on Delete, you don't delete yourself for example) 
+		 -->
+		Nota: the operation is not apply to myself (if you click on Delete, you don't delete yourself for example) 
 		<table >
 			<tr><td style="padding: 0px 5px 50px 5px;">
 			<button ng-click="cranectrl.listUsersDoOperation('ENABLE')" class="btn btn-success btn-xs">Enable</button>

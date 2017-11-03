@@ -196,23 +196,25 @@ public class PropertiesBonitaConnection implements PropertiesParam {
         final StatusOperation statusOperation = new StatusOperation("Check BonitaConnection");
 
         try {
-
-            final File fileBonitaHome = new File(mBonitahome);
-            if (!fileBonitaHome.exists())
-            {
-                statusOperation.mStatusError = "BonitaHome path[" + mBonitahome + "] does not exist.";
-                return statusOperation;
-            }
-            final File fileBonitaHomeClient = new File(mBonitahome + File.separator + "client" + File.separator + "conf" + File.separator
-                    + "bonita-client.properties");
-            if (!fileBonitaHomeClient.exists())
-            {
-                statusOperation.mStatusError = "BonitaHome path[" + mBonitahome + "] is not a BonitaHome directory.";
-                return statusOperation;
-            }
-            System.setProperty(BonitaHome.BONITA_HOME, fileBonitaHome.getAbsolutePath());
-
-            // Test login and admin rights
+        	// Bonita home not exist anymore after 7.3 so it's not an error
+        	if (mBonitahome!=null && mBonitahome.length()>0)
+        	{
+	            final File fileBonitaHome = new File(mBonitahome);
+	            if (!fileBonitaHome.exists())
+	            {
+	                statusOperation.mStatusError = "BonitaHome path[" + mBonitahome + "] does not exist.";
+	                return statusOperation;
+	            }
+	            final File fileBonitaHomeClient = new File(mBonitahome + File.separator + "client" + File.separator + "conf" + File.separator
+	                    + "bonita-client.properties");
+	            if (!fileBonitaHomeClient.exists())
+	            {
+	                statusOperation.mStatusError = "BonitaHome path[" + mBonitahome + "] is not a BonitaHome directory.";
+	                return statusOperation;
+	            }
+	            System.setProperty(BonitaHome.BONITA_HOME, fileBonitaHome.getAbsolutePath());
+        	}
+        	// Test login and admin rights
             final PlatformLoginAPI platformLoginAPI = PlatformAPIAccessor.getPlatformLoginAPI();
             final PlatformSession session = platformLoginAPI.login(mTechnicalUser, mTechnicalPassword);
 
@@ -220,7 +222,7 @@ public class PropertiesBonitaConnection implements PropertiesParam {
             Long idTenant;
             // Get tenant id, and activate it if not active
 
-            if (mDomain.equals(DEFAULT_TENANT)) {
+            if (mDomain==null || mDomain.length()==0 || DEFAULT_TENANT.equals(mDomain)) {
                 idTenant = platformAPI.getDefaultTenant().getId();
             } else {
                 idTenant = platformAPI.getTenantByName(mDomain).getId();
@@ -231,13 +233,13 @@ public class PropertiesBonitaConnection implements PropertiesParam {
 
             final boolean isAdmin = apiSession.isTechnicalUser();
             if (!isAdmin) {
-                statusOperation.mStatusError = "The user '" + mLogin + "' is not an admistrator.";
+                statusOperation.mStatusError = "The user '" + mLogin + "' is not the technical user.";
             } else {
                 statusOperation.mStatusinfo = "Ok";
             }
 
         } catch (final TenantNotFoundException e) {
-            statusOperation.mStatusError = "The tenant '" + mDomain + "' not exists. Please create it and start again.";
+            statusOperation.mStatusError = "The Domain (tenant) '" + mDomain + "' not exists. Please create it and start again.";
         } catch (final BonitaHomeNotSetException e) {
             statusOperation.mStatusError = "The bonitahome directory [" + mBonitahome + "] is incorrect.";
 
@@ -254,7 +256,13 @@ public class PropertiesBonitaConnection implements PropertiesParam {
             statusOperation.mStatusError = "Login exception with login [" + mLogin + "]/password[" + mPassword
                     + "]";
         }
+        catch(Exception e)
+        {
+            statusOperation.mStatusError = "Error ["+e.toString()+"]";
+                    
+        }
 
+        
         if (previousBonitaHome != null) {
             System.setProperty(BonitaHome.BONITA_HOME, previousBonitaHome);
         }

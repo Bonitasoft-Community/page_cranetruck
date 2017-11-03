@@ -113,7 +113,7 @@ public class UsersOperation {
         } catch (final Exception e)
         {
             logger.severe("GetUserList : " + e.toString());
-            statusOperation.mStatusResultJson.put("statuserror", e.toString());
+            statusOperation.mStatusResultJson.put("error", e.toString());
             statusOperation.listEvents.add(new BEvent(eventListError, e, ""));
         }
 
@@ -216,7 +216,7 @@ public class UsersOperation {
             statusOperation.mStatusResultJson.put("status", statusSuccess);
             statusOperation.mStatusResultJson.put("statusfinal", statusFinal);
             if (numberOfError > 0) {
-                statusOperation.mStatusResultJson.put("statuserror", "Errors on " + statusFinal);
+                statusOperation.mStatusResultJson.put("error", "Errors on " + statusFinal);
                 statusOperation.listEvents.add(new BEvent(eventOperationOnUsersFailed, statusFinal));
             } else {
                 statusOperation.listEvents.add(new BEvent(eventOperationOnUsersSuccess, statusSuccess));
@@ -224,7 +224,7 @@ public class UsersOperation {
         } catch (final Exception e)
         {
             logger.severe("GetUserList : " + e.toString());
-            statusOperation.mStatusResultJson.put("statuserror", e.toString());
+            statusOperation.mStatusResultJson.put("error", e.toString());
         }
 
         // play the get list in order to refresh the list
