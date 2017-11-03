@@ -1,52 +1,57 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
- <groupId>com.bonitasoft.custompage</groupId>
-  <artifactId>CustomPageCraneTruck</artifactId>
-  <version>1.0.0</version>
-  <name>CustomPageCraneTruck</name>
-   <dependencies>
-  
-  	 
-  	<dependency>
-  		<groupId>org.bonitasoft.engine</groupId>
-  		<artifactId>bonita-client</artifactId>
-  		<version>7.1.5</version>
-	</dependency>
-	<dependency>
-  		<groupId>org.bonitasoft.engine</groupId>
-  		<artifactId>bonita-server</artifactId>
-  		<version>7.1.5</version>
-	</dependency>
-  
-   <!--  look the readmetocompile to know how to add this JAR in your maven repository -->
-    <dependency>
-        <groupId>com.bonitasoft.engine</groupId>
-        <artifactId>bonita-client-sp</artifactId>
-        <version>7.2.0</version>
-    </dependency>
-    <dependency>
-        <groupId>com.bonitasoft.engine</groupId>
-        <artifactId>bonita-common-sp</artifactId>
-        <version>7.2.0</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.bonitasoft.engine</groupId>
-        <artifactId>bonita-ldap-synchronizer</artifactId>
-        <version>7.2.0</version>
-    </dependency>
-    
-    
-    
-    
-    <dependency>
-        <groupId>com.bonitasoft.log.event</groupId>
-        <artifactId>bonita-event</artifactId>
-        <version>1.0.0</version>
-    </dependency>
-  
-	<dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.bonitasoft.custompage</groupId>
+	<artifactId>CustomPageCraneTruck</artifactId>
+	<version>1.0.0</version>
+	<name>CustomPageCraneTruck</name>
+	<properties>
+		<bonitaversion>7.5.4</bonitaversion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.bonitasoft.engine</groupId>
+			<artifactId>bonita-client</artifactId>
+			<version>${bonitaversion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bonitasoft.engine</groupId>
+			<artifactId>bonita-server</artifactId>
+			<version>${bonitaversion}</version>
+		</dependency>
+
+		<!-- look the readmetocompile to know how to add this JAR in your maven repository -->
+		<!-- mvn install:install-file -Dfile=bonita-client-sp-7.5.4.jar -DgroupId=com.bonitasoft.engine -DartifactId=bonita-client-sp -Dversion=7.5.4 -Dpackaging=jar -->
+		<dependency>
+			<groupId>com.bonitasoft.engine</groupId>
+			<artifactId>bonita-client-sp</artifactId>
+			<version>${bonitaversion}</version>
+		</dependency>
+		
+		<!-- mvn install:install-file -Dfile=bonita-common-sp-7.5.4.jar -DgroupId=com.bonitasoft.engine -DartifactId=bonita-common-sp -Dversion=7.5.4 -Dpackaging=jar -->
+		<dependency>
+			<groupId>com.bonitasoft.engine</groupId>
+			<artifactId>bonita-common-sp</artifactId>
+			<version>${bonitaversion}</version>
+		</dependency>
+
+		<!-- mvn install:install-file -Dfile=bonita-ldap-synchronizer-7.5.4.jar -DgroupId=com.bonitasoft.engine -DartifactId=bonita-ldap-synchronizer -Dversion=7.5.4 -Dpackaging=jar -->
+		<dependency>
+			<groupId>com.bonitasoft.engine</groupId>
+			<artifactId>bonita-ldap-synchronizer</artifactId>
+			<version>${bonitaversion}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.bonitasoft.log.event</groupId>
+			<artifactId>bonita-event</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bonitasoft.ext.BonitaProperties</groupId>
+			<artifactId>bonita-properties</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1</version>
@@ -57,5 +62,11 @@
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
-  </dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.4</version>
+		</dependency>
+	</dependencies>
+
 </project>

@@ -312,9 +312,9 @@ public class PropertiesSynchronize implements PropertiesParam {
             }
 
             // we get a Properties Synchronize
-            propertiesSynchronizeTest.propertiesSynchronize = PropertiesSynchronize.getInstanceFromMap(jsonHash);
+            propertiesSynchronizeTest.propertiesSynchronize = PropertiesSynchronize.getInstanceFromMap((Map) jsonHash.get("sync"));
             // and a LDAP test
-            propertiesSynchronizeTest.propertiesLdapConnection = PropertiesLdapConnection.getInstanceFromMap(jsonHash);
+            propertiesSynchronizeTest.propertiesLdapConnection = PropertiesLdapConnection.getInstanceFromMap( (Map) jsonHash.get("ldap"));
             propertiesSynchronizeTest.propertiesSynchronize.checkErrors();
             propertiesSynchronizeTest.propertiesLdapConnection.checkErrors();
 

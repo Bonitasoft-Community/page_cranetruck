@@ -39,24 +39,34 @@ appCommand.controller('CraneTruckController',
 	this.errorslevel = [ {name:"Warning", value:"WARNING"}, {name:"Info", value:"INFO"}, {name:"Fine", value:"FINE"} ];
 	this.lowerupper = [ {name:"lowercase", value:"lowercase"}, {name:"uppercase", value:"uppercase"}, {name:"mixed", value:"mixed"} ];
 	
-	// ------------ init
-	this.init=function() {
-		this.rolelist= ["member", "admin"];
-	};
-	this.init();
-	
 	this.statusldap = {inprogress:""};
 	this.statusbonita = { inprogress:""};
 	
 	this.ldapSynchronizerPath='C:/atelier/LDAP-Synchronizer 6.4.2/BonitaBPMSubscription-6.4.2-LDAP-Synchronizer/conf';
 	
+
+	// ------------ init
+	this.init=function() {
+		this.rolelist= ["member", "admin"];
+		var self=this;
+		
+		$http.get( '?page=custompage_cranetruck&action=initpage' )
+		.success( function ( jsonResult ) {
+				console.log("readProperties",jsonResult);
+				self.ldapSynchronizerPath=jsonResult.ldapSynchronizerPath;
+				self.domain = jsonResult.domain;
+		});
+	};
+	this.init();
 	
+		
 	// ---------------------------------------------- Properties files
 	this.readProperties = function() {
 		var post = { "ldapSynchronizerPath" : this.ldapSynchronizerPath, "domain": this.domain };
-		var json= angular.toJson(post, true);
+		var json= encodeURI( angular.toJson(post, false));
+
 		var self=this;
-		$http.get( '?page=custompage_cranetruck&action=readfromproperties&json='+json )
+		$http.get( '?page=custompage_cranetruck&action=readfromproperties&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("readProperties",jsonResult);
 						
@@ -96,10 +106,11 @@ appCommand.controller('CraneTruckController',
 	};
 	this.writeProperties = function() {
 		this.updateValueFromPage();
-		var json= angular.toJson(this.data, false);
+		var json= encodeURI( angular.toJson(this.data, false));
+
 		var self=this;
 		console.log("writeProperties json="+json+" size="+json.length);
-		$http.get( '?page=custompage_cranetruck&action=writetoproperties&json='+json )
+		$http.get( '?page=custompage_cranetruck&action=writetoproperties&&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("writeProperties",jsonResult);
 							
@@ -133,9 +144,9 @@ appCommand.controller('CraneTruckController',
 		this.statusldap.inprogress ="...connection in progress...";		
 		var self=this;
 		this.updateValueFromPage();
-		var json= angular.toJson(this.data.ldap, true);
-		
-		$http.get( '?page=custompage_cranetruck&action=testldapconnection&json='+json )
+		var json= encodeURI( angular.toJson(this.data.ldap, false));
+
+		$http.get( '?page=custompage_cranetruck&action=testldapconnection&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("result",jsonResult);
 						self.statusldap	= jsonResult;
@@ -168,20 +179,21 @@ appCommand.controller('CraneTruckController',
 	
 	this.testBonitaConnection = function()
 	{
-		// this.statusbonita.inprogress = "...connection in progress...";		
+		this.statusbonita.inprogress = "...connection in progress...";		
 		
 		var self=this;
-		var json= angular.toJson(this.data.bonita, true);
-		
-		$http.get( '?page=custompage_cranetruck&action=testbonitaconnection&json='+json )
+		var json= encodeURI( angular.toJson(this.data.bonita, false));
+
+		$http.get( '?page=custompage_cranetruck&action=testbonitaconnection&paramjson='+json )
 				.success( function ( jsonResult ) {
 					console.log("testBonitaConnection",jsonResult);
 					// self.statusbonita.inprogress ="";		
 					self.statusbonita	= jsonResult;
 				})
 				.error( function() {
-					alert('Error while test LDAP connection');
+					// alert('Error while test LDAP connection');
 					// self.statusbonita.inprogress ="";		
+					self.statusbonita.inprogress ="Error connecting the server";
 					});
 				
 	};
@@ -196,9 +208,9 @@ appCommand.controller('CraneTruckController',
 		this.jaasenvironment.status.error="";
 		
 		var self=this;
-		var json= angular.toJson(this.jaasenvironment.input, true);
-		
-		$http.get( '?page=custompage_cranetruck&action=getjaasenvironment&json='+json )
+		var json= encodeURI( angular.toJson(this.jaasenvironment.input, false));
+
+		$http.get( '?page=custompage_cranetruck&action=getjaasenvironment&paramjson='+json )
 				.then( function ( jsonResult ) {
 					console.log("return JAAS Environment",jsonResult.data);
 					// self.statusbonita.inprogress ="";		
@@ -220,22 +232,23 @@ appCommand.controller('CraneTruckController',
 	this.testSynchronize = function() {
 		this.updateValueFromPage();
 		this.synctest.inprogress = "Test in progress";
-		var json= angular.toJson(this.data, false);
+		var json= encodeURI( angular.toJson(this.data, false));
+
 		var self=this;
 		console.log("writeProperties json="+json+" size="+json.length);
-		$http.get( '?page=custompage_cranetruck&action=testsynchronize&json='+json )
+		$http.get( '?page=custompage_cranetruck&action=testsynchronize&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("writeProperties",jsonResult);
 							
 						self.synctest.inprogress = "";
 						self.synctest.status = jsonResult.status;
-						self.synctest.statuserror = jsonResult.error;
+						self.synctest.error = jsonResult.error;
 						self.synctest.detailsjsonmap= json.detailsjsonmap;
 						
 				})
 				.error( function() {
 					alert('Error during access the server for Test');
-					self.synctest.statuserror = "Error accessing the server.";
+					self.synctest.error = "Error accessing the server.";
 					self.synctest.inprogress = "";
 					});
 	};
@@ -279,14 +292,14 @@ appCommand.controller('CraneTruckController',
 	
 	
 	this.testMapper = function() {
-		this.mappertest.statuserror = "This function is not yet implemented.";
+		this.mappertest.error = "This function is not yet implemented.";
 	};
 
 	// ---------------------------------------------- testAllConfiguration
 	this.alltests = {};
 	
 	this.testAllConfiguration = function() {
-		this.alltests.statuserror = "This function is not yet implemented.";
+		this.alltests.error = "This function is not yet implemented.";
 	};
 	
 	
@@ -327,10 +340,12 @@ appCommand.controller('CraneTruckController',
 		this.jaas.inprogress ="...test Jaas in progress...";	
 		this.jaas.status	=	"";
 		var self=this;
-		var json= angular.toJson(this.jaas.input, false);
-		var jsonurl = json.replace("&","_£");
+		// var json= angular.toJson(this.jaas.input, false);
+		// var jsonurl = json.replace("&","_£");
+		var json= encodeURI( angular.toJson(this.jaas.input, false));
+
 		
-		$http.get( '?page=custompage_cranetruck&action=testjaasconnection&json='+jsonurl )
+		$http.get( '?page=custompage_cranetruck&action=testjaasconnection&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("result",jsonResult);
 						self.jaas.status			= jsonResult;
@@ -377,10 +392,11 @@ appCommand.controller('CraneTruckController',
 	this.testLdaploginmodule = function() {
 		this.ldaploginmodule.inprogress ="...test LdapLoginModule in progress...";		
 		var self=this;
-		var json= angular.toJson(this.ldaploginmodule.input, false);
-		var jsonurl = json.replace("&","_£");
-		
-		$http.get( '?page=custompage_cranetruck&action=testldaploginmodule&json='+jsonurl )
+		// var json= angular.toJson(this.ldaploginmodule.input, false);
+		//var jsonurl = json.replace("&","_£");
+		var json= encodeURI( angular.toJson(this.ldaploginmodule.input, false));
+
+		$http.get( '?page=custompage_cranetruck&action=testldaploginmodule&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("result statusldaploginmodule",jsonResult);
 						self.ldaploginmodule.status			= jsonResult;
@@ -409,6 +425,7 @@ appCommand.controller('CraneTruckController',
 	this.listusers.list=[];
 	this.listusers.operationchoice=[ {name:"Disable (except me)", value:"DISABLE"}, {name:"Enable", value:"ENABLE"},{name:"Delete (except me)", value:"DELETE"} ];
 	this.listusers.scopechoice=[ {name:"All", value:"ALL"}, {name:"Use filter (Max number & Filter)", value:"ONLYFIRST"} ];
+	this.listusers.input.scopeselect="ONLYFIRST";
 	
 	this.listusers.status={};
 	
@@ -422,12 +439,13 @@ appCommand.controller('CraneTruckController',
 		
 		this.listusers.status.inprogressgetuser="In progress...";
 		
-		var json= angular.toJson(this.listusers.input, false);
-		
-		var jsonurl = json.replace("&","_£");
+		// var json= angular.toJson(this.listusers.input, false);		
+		// var jsonurl = json.replace("&","_£");
+		var json= encodeURI( angular.toJson(this.listusers.input, false));
+
 		var self=this;
 		
-		$http.get( '?page=custompage_cranetruck&action=usersgetlist&json='+jsonurl )
+		$http.get( '?page=custompage_cranetruck&action=usersgetlist&paramjson='+json )
 				.success( function ( jsonResult ) {
 						console.log("result statusUsers",jsonResult);
 						self.listusers.status			= jsonResult;
@@ -451,14 +469,18 @@ appCommand.controller('CraneTruckController',
 		if (confirm("Do you really want to "+action+" ? "))
 		{
 			this.listusers.status.info="In progress...";
-			this.listusers.input.operation =action;
+			this.listusers.input.operation = action;
 			this.listusers.input.scope = this.listusers.input.scopeselect.value;
-			var json= angular.toJson(this.listusers.input, false);
-			var jsonurl = json.replace("&","_£");
+
+			var param={'filteruser':this.listusers.input.filteruser, 'operation':action,'scope':this.listusers.input.scope,'maxtodisplay':this.listusers.input.maxtodisplay};
 			
+			// var json= angular.toJson(this.listusers.input, false);
+			// var jsonurl = json.replace("&","_£");
+			var json= encodeURI( angular.toJson(param, false));
+
 			var self=this;
 			
-			$http.get( '?page=custompage_cranetruck&action=usersdooperation&json='+jsonurl )
+			$http.get( '?page=custompage_cranetruck&action=usersdooperation&paramjson='+json )
 					.success( function ( jsonResult ) {
 							console.log("result listUsersDoOperation",jsonResult);
 							self.listusers.status			= jsonResult;
@@ -469,7 +491,7 @@ appCommand.controller('CraneTruckController',
 					.error( function() {
 						alert('Error while userdooperation connection');
 						self.listusers.status="";
-						self.listusers.statuserror="Error connecting the server";		
+						self.listusers.error="Error connecting the server";		
 						});
 		}
 	}
