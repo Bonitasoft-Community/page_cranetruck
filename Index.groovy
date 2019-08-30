@@ -48,6 +48,7 @@ public class Index implements PageController {
 
 	private static Logger loggerCustomPage= Logger.getLogger("org.bonitasoft.custompage.longboard.groovy");
 	
+    private static String pageName="cranetruck";
 	
 	public static class ActionAnswer
 	{
@@ -81,11 +82,11 @@ public class Index implements PageController {
 			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJsonSt,  response, pageResourceProvider, pageContext );
 			if (! actionAnswer.isManaged)
 			{
-				loggerCustomPage.info("#### CustomPage:Groovy NoAction, return index.html" );
+				loggerCustomPage.info("#### CustomPage"+pageName+":Groovy NoAction, return index.html" );
 				runTheBonitaIndexDoGet( request, response,pageResourceProvider,pageContext);
 				return;
 			}
-			loggerCustomPage.info("#### CustomPage:Groovy , ResponseMap="+actionAnswer.responseMap.size() );
+			loggerCustomPage.info("#### CustomPage"+pageName+": ResponseMap="+actionAnswer.responseMap.size() );
 			
 			if (actionAnswer.responseMap.size()>0)
 			{
@@ -95,7 +96,7 @@ public class Index implements PageController {
 				PrintWriter out = response.getWriter()
 				String jsonSt = JSONValue.toJSONString( actionAnswer.responseMap );
 				out.write( jsonSt );
-				loggerCustomPage.info("#### ##############################CustomPage: return json["+jsonSt+"]" );
+				loggerCustomPage.info("#### CustomPage"+pageName+": return json["+jsonSt+"]" );
 				out.flush();
 				out.close();
 				return;
@@ -106,7 +107,7 @@ public class Index implements PageController {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
 			String exceptionDetails = sw.toString();
-			loggerCustomPage.severe("#### LongBoardCustomPage:Groovy Exception ["+e.toString()+"] at "+exceptionDetails);
+			loggerCustomPage.severe("#### CustomPage"+pageName+": Exception ["+e.toString()+"] at "+exceptionDetails);
 		}
 	}
 	
@@ -132,7 +133,7 @@ public class Index implements PageController {
 			e.printStackTrace(new PrintWriter(sw));
 			String exceptionDetails = sw.toString();
 			
-			loggerCustomPage.severe("#### LongBoardCustomPage:Groovy LongBoard: getinteger : Exception "+e.toString()+" on  ["+valueParamSt+"] at "+exceptionDetails );
+			loggerCustomPage.severe("#### CustomPage"+pageName+": getinteger : Exception "+e.toString()+" on  ["+valueParamSt+"] at "+exceptionDetails );
 			return defaultValue;
 		}
 	}
@@ -158,7 +159,7 @@ public class Index implements PageController {
 			e.printStackTrace(new PrintWriter(sw));
 			String exceptionDetails = sw.toString();
 			
-			loggerCustomPage.severe("#### LongBoardCustomPage:Groovy LongBoard: getBoolean : Exception "+e.toString()+" on  ["+valueParamSt+"] at "+exceptionDetails );
+			loggerCustomPage.severe("#### CustomPage"+pageName+": getBoolean : Exception "+e.toString()+" on  ["+valueParamSt+"] at "+exceptionDetails );
 			return defaultValue;
 		}
 	}
@@ -168,27 +169,34 @@ public class Index implements PageController {
 	 *runTheBonitaIndexDoGet
 	 * 
 	 */
-	private void runTheBonitaIndexDoGet(HttpServletRequest request, HttpServletResponse response, PageResourceProvider pageResourceProvider, PageContext pageContext) {
-		try {
-				def String indexContent;
-				pageResourceProvider.getResourceAsStream("index.html").withStream { InputStream s->
-						indexContent = s.getText()
-				}
-				
-				// def String pageResource="pageResource?&page="+ request.getParameter("page")+"&location=";
-				// indexContent= indexContent.replace("@_USER_LOCALE_@", request.getParameter("locale"));
-				// indexContent= indexContent.replace("@_PAGE_RESOURCE_@", pageResource);
-				
-				response.setCharacterEncoding("UTF-8");
-				response.addHeader("content-type", "text/html");
+	 private void runTheBonitaIndexDoGet(HttpServletRequest request, HttpServletResponse response, PageResourceProvider pageResourceProvider, PageContext pageContext) {
+	       try {
+	               String indexContent;
+	               pageResourceProvider.getResourceAsStream("index.html").withStream { InputStream s->
+	                       indexContent = s.getText()
+	               }
+	               
+	               File pageDirectory = pageResourceProvider.getPageDirectory();
+	               loggerCustomPage.info("#### "+pageName+": pageDirectory st="+pageDirectory.getAbsolutePath() );
+	                       
+	               // def String pageResource="pageResource?&page="+ request.getParameter("page")+"&location=";
+	               // indexContent= indexContent.replace("@_USER_LOCALE_@", request.getParameter("locale"));
+	               indexContent= indexContent.replace("@_CURRENTTIMEMILIS_@", String.valueOf(System.currentTimeMillis()));
+	               indexContent= indexContent.replace("@_PAGEDIRECTORY_@", pageDirectory.getAbsolutePath()) ;
+	               
+	               response.setCharacterEncoding("UTF-8");
+	               response.addHeader("content-type", "text/html");
+	               
+	               PrintWriter out = response.getWriter();
+	               out.print(indexContent);
+	               out.flush();
+	               out.close();
+	               loggerCustomPage.info("#### "+pageName+": return index.hml size("+indexContent.length()+"]");
+	               
+	       } catch (Exception e) {
+	           loggerCustomPage.severe("#### "+pageName+":Error "+e.toString());
+	       }
+	       }
 
-				PrintWriter out = response.getWriter();
-				out.print(indexContent);
-				out.flush();
-				out.close();
-		} catch (Exception e) {
-				e.printStackTrace();
-		}
-		}
 
 }
