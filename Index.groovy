@@ -76,7 +76,8 @@ public class Index implements PageController {
 		
 		try {
 			String requestParamJson= request.getParameter("paramjson");
-			String requestParamJsonSt = (requestParamJson==null ? null : java.net.URLDecoder.decode(requestParamJson, "UTF-8"));
+			// in fact, the request is decoded by the Tomcat Server
+			// String requestParamJsonSt = (requestParamJson==null ? null : java.net.URLDecoder.decode(requestParamJson, "UTF-8"));
 
 			
 			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJsonSt,  response, pageResourceProvider, pageContext );
