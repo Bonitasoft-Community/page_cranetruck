@@ -80,7 +80,7 @@ public class Index implements PageController {
 			// String requestParamJsonSt = (requestParamJson==null ? null : java.net.URLDecoder.decode(requestParamJson, "UTF-8"));
 
 			
-			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJsonSt,  response, pageResourceProvider, pageContext );
+			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJson,  response, pageResourceProvider, pageContext );
 			if (! actionAnswer.isManaged)
 			{
 				loggerCustomPage.info("#### CustomPage"+pageName+":Groovy NoAction, return index.html" );
