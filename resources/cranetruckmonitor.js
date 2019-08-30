@@ -50,7 +50,7 @@ appCommand.controller('CraneTruckController',
 		this.rolelist= ["member", "admin"];
 		var self=this;
 		
-		$http.get( '?page=custompage_cranetruck&action=initpage' )
+		$http.get( '?page=custompage_cranetruck&action=initpage&t='+Date.now() )
 		.success( function ( jsonResult ) {
 				console.log("readProperties",jsonResult);
 				self.ldapSynchronizerPath=jsonResult.ldapSynchronizerPath;
@@ -66,7 +66,7 @@ appCommand.controller('CraneTruckController',
 		var json= encodeURI( angular.toJson(post, false));
 
 		var self=this;
-		$http.get( '?page=custompage_cranetruck&action=readfromproperties&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=readfromproperties&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("readProperties",jsonResult);
 						
@@ -110,7 +110,7 @@ appCommand.controller('CraneTruckController',
 
 		var self=this;
 		console.log("writeProperties json="+json+" size="+json.length);
-		$http.get( '?page=custompage_cranetruck&action=writetoproperties&&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=writetoproperties&&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("writeProperties",jsonResult);
 							
@@ -146,7 +146,7 @@ appCommand.controller('CraneTruckController',
 		this.updateValueFromPage();
 		var json= encodeURI( angular.toJson(this.data.ldap, false));
 
-		$http.get( '?page=custompage_cranetruck&action=testldapconnection&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=testldapconnection&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("result",jsonResult);
 						self.statusldap	= jsonResult;
@@ -165,7 +165,7 @@ appCommand.controller('CraneTruckController',
 	{
 		var self=this;
 		
-		$http.get( '?page=custompage_cranetruck&action=getdefaultbonitaconnection' )
+		$http.get( '?page=custompage_cranetruck&action=getdefaultbonitaconnection&t='+Date.now() )
 				.success( function ( jsonResult ) {
 					console.log("defaultBonitaConnection",jsonResult);
 					self.statusbonita	= jsonResult;
@@ -184,7 +184,7 @@ appCommand.controller('CraneTruckController',
 		var self=this;
 		var json= encodeURI( angular.toJson(this.data.bonita, false));
 
-		$http.get( '?page=custompage_cranetruck&action=testbonitaconnection&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=testbonitaconnection&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 					console.log("testBonitaConnection",jsonResult);
 					// self.statusbonita.inprogress ="";		
@@ -210,7 +210,7 @@ appCommand.controller('CraneTruckController',
 		var self=this;
 		var json= encodeURI( angular.toJson(this.jaasenvironment.input, false));
 
-		$http.get( '?page=custompage_cranetruck&action=getjaasenvironment&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=getjaasenvironment&paramjson='+json+'&t='+Date.now() )
 				.then( function ( jsonResult ) {
 					console.log("return JAAS Environment",jsonResult.data);
 					// self.statusbonita.inprogress ="";		
@@ -236,7 +236,7 @@ appCommand.controller('CraneTruckController',
 
 		var self=this;
 		console.log("writeProperties json="+json+" size="+json.length);
-		$http.get( '?page=custompage_cranetruck&action=testsynchronize&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=testsynchronize&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("writeProperties",jsonResult);
 							
@@ -345,7 +345,7 @@ appCommand.controller('CraneTruckController',
 		var json= encodeURI( angular.toJson(this.jaas.input, false));
 
 		
-		$http.get( '?page=custompage_cranetruck&action=testjaasconnection&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=testjaasconnection&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("result",jsonResult);
 						self.jaas.status			= jsonResult;
@@ -396,7 +396,7 @@ appCommand.controller('CraneTruckController',
 		//var jsonurl = json.replace("&","_£");
 		var json= encodeURI( angular.toJson(this.ldaploginmodule.input, false));
 
-		$http.get( '?page=custompage_cranetruck&action=testldaploginmodule&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=testldaploginmodule&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("result statusldaploginmodule",jsonResult);
 						self.ldaploginmodule.status			= jsonResult;
@@ -445,7 +445,7 @@ appCommand.controller('CraneTruckController',
 
 		var self=this;
 		
-		$http.get( '?page=custompage_cranetruck&action=usersgetlist&paramjson='+json )
+		$http.get( '?page=custompage_cranetruck&action=usersgetlist&paramjson='+json+'&t='+Date.now() )
 				.success( function ( jsonResult ) {
 						console.log("result statusUsers",jsonResult);
 						self.listusers.status			= jsonResult;
@@ -480,7 +480,7 @@ appCommand.controller('CraneTruckController',
 
 			var self=this;
 			
-			$http.get( '?page=custompage_cranetruck&action=usersdooperation&paramjson='+json )
+			$http.get( '?page=custompage_cranetruck&action=usersdooperation&paramjson='+json+'&t='+Date.now() )
 					.success( function ( jsonResult ) {
 							console.log("result listUsersDoOperation",jsonResult);
 							self.listusers.status			= jsonResult;
