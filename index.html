@@ -31,13 +31,14 @@
 
 	<center>
 	<table><tr><td><h1>Crane Truck</h1></td><td rowspan="2"><img src="pageResource?page=custompage_cranetruck&location=img/cranetruck.jpg" width="150" heigth="150" /></td></tr>
-		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.3</a></td></tr>
+		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.4</a></td></tr>
 		<tr><td>
 		<div id="showHistory" ng-show="cranectrl.isshowhistory" style="border-width:2px;border-style:ridge;border-color:blue">
 		1.0 First version<br>
 		1.1 Add user management<br>
 		1.2 Ready 7.5<br>
 		1.3 Update for 7.9<br>
+		1.4 Accept large Jaas Content
 		</td></tr>
 		</div>
 	</table>
@@ -57,39 +58,57 @@
 			
 		<button ng-click="cranectrl.getDefaultJaasConnection()"  class="btn btn-info btn-xs" >Get example values</button><p>
 
-		<table>
+		<table width="100%">
 		<tr>
 			<td>JAAS content:</td>
-			<td><textarea  ng-model="cranectrl.jaas.input.jaascontent"  rows="8" cols="60"></textarea></td>
-			<td><span class="explanation">The content of the JAAS file. You can directly set it here, or give the location of the JAAS file</span></td></tr>
+			<td><textarea  ng-model="cranectrl.jaas.input.jaascontent"  rows="8" cols="60"></textarea><br>
+			<span class="explanation">The content of the JAAS file. You can directly set it here, or give the location of the JAAS file</span></td></tr>
 		</tr><tr>
 			<td>JAAS file:</td>
-			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasfile" size="50" ></td>
-			<td><span class="explanation">The JAAS-STANDARD file</span></td></tr>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasfile" size="50" >&nbsp;&nbsp;
+			<span class="explanation">The JAAS-STANDARD file</span></td></tr>
 		</tr><tr>
 			<td>Authentication key:</td>
-			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasauthentkey" placeholder="default"></td>
-			<td><span class="explanation">in the JAAS file, you may have multiple key. By default, key should be Authentication-1 or BonitaAuthentication-1 (depend of the Bonita Version)</span></td></tr>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasauthentkey" placeholder="default">&nbsp;&nbsp;
+			<span class="explanation">in the JAAS file, you may have multiple key. By default, key should be Authentication-1 or BonitaAuthentication-1 (depend of the Bonita Version)</span></td></tr>
 		<tr><td colspan="3"><b><i>Try to log using the JAAS configuration</i></b><br><span  class="explanation">Verify the JAAS configuration by logging with a user / password</span></td></tr>
 		</tr><tr>
 			<td>Login:</td>
-			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasusername" ></td>
-			<td><span class="explanation">the login name</span></td></tr>
+			<td> <input type="text" ng-model="cranectrl.jaas.input.jaasusername" >&nbsp;&nbsp;
+			<span class="explanation">The login name</span></td></tr>
 		</tr><tr>
 			<td>Password:</td>
 			<td> <input type="checkbox" ng-model="cranectrl.jaas.input.showpassword" title="Show the password" ng-click="cranectrl.showpasswordjaas()">&nbsp;
-			   <input type="{{cranectrl.jaas.input.inputpassword}}" ng-model="cranectrl.jaas.input.jaaspassword" >			   
-			   </td>
-			<td><span class="explanation">The password to check the JAAS configuration</span></td></tr>
+			   <input type="{{cranectrl.jaas.input.inputpassword}}" ng-model="cranectrl.jaas.input.jaaspassword" >&nbsp;&nbsp;			   
+			   <span class="explanation">The password to check the JAAS configuration</span></td></tr>
 		</tr>
+		<tr>
+			<td>LDAP Step by step</td>
+			<td><input type="checkbox" ng-model="cranectrl.jaas.input.stepconnection" title="Step by step connection">&nbsp;&nbsp;&nbsp;
+			<span class="explanation">If your JaasContent reference a LDAP source (com.sun.security.auth.module.LdapLoginModule), then a step by step connection is perform, to understand which step failed</span></td></tr>
 		</table>
+		 
 		<button ng-click="cranectrl.testJaasConnection()"  class="btn btn-info btn-xs" >Test JAAS connection</button><br>
 		<span class="label label-success">{{cranectrl.jaas.inprogress}}</span><p>
 		<span class="label label-success">{{cranectrl.jaas.status.detailsjsonmap.status}}</span><p>
 		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
+		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
+	
+		<div class="panel panel-primary" ng-if="cranectrl.jaas.input.stepconnection">
+			<div class="panel-heading">Ldap Connection step by step</div>
+			<div class="panel-body">
+				<table class="table table-stripped">					
+					<tr ng-repeat="detail in cranectrl.jaas.status.details  track by $index">
+						<td>{{detail}}</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	
+	
 		
 		
-		<span>How to configure the JAAS file ? <a href="" ng-click="cranectrl.jaas.isshowexplanation = ! cranectrl.jaas.isshowexplanation;">Visible</a></td></tr>
+		<span>How to configure the JAAS file ? <a href="" ng-click="cranectrl.jaas.isshowexplanation = ! cranectrl.jaas.isshowexplanation;">Show</a></td></tr>
 		<div  ng-show="cranectrl.jaas.isshowexplanation" style="border-width:2px;border-style:ridge;border-color:blue">
 		First, create a JAAS file with the content.<br>
 		Second: change the service<br>
@@ -600,7 +619,7 @@
 <script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-sanitize.min.js"></script>
 
 <!-- Application dependencies -->
-<script src="pageResource?page=custompage_cranetruck&location=cranetruckmonitor.js"></script>
+<script src="pageResource?page=custompage_cranetruck&location=cranetruckmonitor.js&t=@_CURRENTTIMEMILIS_@"></script>
 
 </body>
 </html>		

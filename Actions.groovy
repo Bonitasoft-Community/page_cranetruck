@@ -1,5 +1,6 @@
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.HttpSession;
 import java.text.SimpleDateFormat;
 import java.util.logging.Logger;
 import java.io.FileInputStream;
@@ -61,7 +62,7 @@ import org.bonitasoft.log.event.BEvent;
 import org.bonitasoft.log.event.BEventFactory;
 import org.bonitasoft.log.event.BEvent.Level;
 
-import org.bonitasoft.ext.properties.BonitaProperties;
+import org.bonitasoft.properties.BonitaProperties;
 
 import com.bonitasoft.custompage.cranetruck.PropertiesLdapConnection;
 import com.bonitasoft.custompage.cranetruck.PropertiesBonitaConnection;
@@ -98,7 +99,8 @@ public class Actions {
 				return actionAnswer;
 			}
 			actionAnswer.isManaged=true;
-			
+			HttpSession httpSession = request.getSession() ;
+            
 		
 			
 			logger.info("###################################### action is["+action+"] json=["+paramJsonSt+"] !");
@@ -167,8 +169,10 @@ public class Actions {
 			{
 			    // parama is given in the URL : so the & was encode _£
 				// String jsonStReplace = paramJsonSt.replace("_£", "&");
-
-				JaasCheck jaasCheck = JaasCheck.getInstanceFromJsonSt( paramJsonSt );
+			    String accumulateJson = (String) httpSession.getAttribute("accumulate" );
+		        logger.info("testjaasconnection accumulateJson=["+accumulateJson+"]");
+		        
+				JaasCheck jaasCheck = JaasCheck.getInstanceFromJsonSt( accumulateJson );
 				actionAnswer.setResponse( jaasCheck.checkJaasConnection().toMap());
 			}
 			else if ("testldaploginmodule".equals(action))
@@ -198,6 +202,24 @@ public class Actions {
                 UsersOperation userOperations = UsersOperation.getInstanceFromJsonSt( paramJsonSt );
                 userOperations.simulateOperation=false;
                 actionAnswer.setResponse( userOperations.doOperation( identityApi, session.userId ).toMap());
+            }
+            else if ("collect_reset".equals(action))
+            {
+                httpSession.setAttribute("accumulate", "" );
+                actionAnswer.responseMap.put("status", "ok");
+                logger.info("collect_reset");
+                
+            }
+            else if ("collect_add".equals(action))
+            {
+                String paramJsonPartial = request.getParameter("paramjsonpartial");
+                logger.info("collect_add paramJsonPartial=["+paramJsonPartial+"] json=["+paramJsonSt+"]");
+                
+                String accumulateJson = (String) httpSession.getAttribute("accumulate" );
+                accumulateJson+=paramJsonSt;
+                httpSession.setAttribute("accumulate", accumulateJson );
+                actionAnswer.responseMap.put("status", "ok");
+
             }
             
 			return actionAnswer;
