@@ -339,7 +339,11 @@ appCommand.controller('CraneTruckController',
 	{
 		this.jaas.inprogress ="...test Jaas in progress...";	
 		this.jaas.status	=	"";
-		var self=this;
+		this.largeUrlOperation.isJaas = true;
+
+		this.sendLargeUrl('testjaasconnection',this.jaas.input, this.jaas.status);
+		/*
+		/
 		// var json= angular.toJson(this.jaas.input, false);
 		// var jsonurl = json.replace("&","_£");
 		var json= encodeURI( angular.toJson(this.jaas.input, false));
@@ -356,6 +360,7 @@ appCommand.controller('CraneTruckController',
 					alert('Error while test JAAS connection');
 					jeself.jaas.inprogress ="";		
 					});
+					*/
 				
 	};
 	
@@ -561,6 +566,103 @@ appCommand.controller('CraneTruckController',
 	this.getListEvents = function ( listevents ) {
 		return $sce.trustAsHtml(  listevents);
 	}
+	
+	/*
+	this.sendlargeUrl('testjaasconnection',this.jaas.input, this.jaas.status);
+	/
+	// var json= angular.toJson(this.jaas.input, false);
+	// var jsonurl = json.replace("&","_£");
+	var json= encodeURI( angular.toJson(this.jaas.input, false));
+
+	
+	$http.get( '?page=custompage_cranetruck&action=testjaasconnection&paramjson='+json+'&t='+Date.now() )
+			.success( function ( jsonResult ) {
+					console.log("result",jsonResult);
+					self.jaas.status			= jsonResult;
+					
+					self.jaas.inprogress ="";		
+			})
+			.error( function() {
+				alert('Error while test JAAS connection');
+				jeself.jaas.inprogress ="";		
+				});
+				*/
+	// ------------------------------------------------------------------------------------------------------
+	// Send the JSON
+	this.largeUrlOperation = {
+			'listUrlCall' : [],
+			'status' : status,
+			'listUrlPercent':0
+	
+	}
+	this.sendLargeUrl = function( action, json, statusResult ) // , listUrlCall, listUrlIndex )
+	{
+		console.log("sendLargeUrl action="+action);
+		var self=this;
+		// the array maybe very big, so let's create a list of http call
+		self.largeUrlOperation.listUrlCall =[];
+		self.largeUrlOperation.listUrlPercent=0;
+		self.largeUrlOperation.listUrlIndex=0;
+		self.largeUrlOperation.statusResult = statusResult;
+		this.largeUrlOperation.listUrlCall.push( "action=collect_reset");
+		this.largeUrlOperation.listeventsexecution="";
+		
+		// prepare the string
+		var jsonSt = encodeURI( angular.toJson( json, false));
+
+		// split the string by packet of 5000 
+		while (jsonSt.length>0)
+		{
+			var jsonFirst = encodeURIComponent( jsonSt.substring(0,5000));
+			this.largeUrlOperation.listUrlCall.push( "action=collect_add&paramjson="+jsonFirst);
+			jsonSt =jsonSt.substring(5000);
+		}
+		var self=this;
+		self.largeUrlOperation.listUrlCall.push( "action="+action);
+		
+		
+		self.largeUrlOperation.listUrlIndex=0;
+		console.log("sendLargeUrl : send "+self.largeUrlOperation.listUrlCall.length+" Url");
+		
+		self.executeListUrl( self ) // , self.listUrlCall, self.listUrlIndex );
+		
+		
+	};
+	// ------------------------------------------------------------------------------------------------------
+	// List Execution
+	
+	this.executeListUrl = function( self ) // , listUrlCall, listUrlIndex )
+	{
+		console.log("executeListUrl: Call "+self.largeUrlOperation.listUrlIndex+" : "+self.largeUrlOperation.listUrlCall[ self.largeUrlOperation.listUrlIndex ]);
+		self.largeUrlOperation.listUrlPercent= Math.round( (100 *  self.largeUrlOperation.listUrlIndex) / self.largeUrlOperation.listUrlCall.length);
+		
+		$http.get( '?page=custompage_cranetruck&'+self.largeUrlOperation.listUrlCall[ self.largeUrlOperation.listUrlIndex ]+'&t='+Date.now() )
+			.success( function ( jsonResult ) {
+				// console.log("Correct, advance one more",
+				// angular.toJson(jsonResult));
+				self.largeUrlOperation.listUrlIndex = self.largeUrlOperation.listUrlIndex+1;
+				if (self.largeUrlOperation.listUrlIndex  < self.largeUrlOperation.listUrlCall.length )
+					self.executeListUrl( self ) // , self.listUrlCall,
+												// self.listUrlIndex);
+				else
+				{
+					console.log("Finish", angular.toJson(jsonResult));
+					self.largeUrlOperation.listUrlPercent= 100; 
+					self.largeUrlOperation.listeventsexecution    	= jsonResult.listevents;
+					self.largeUrlOperation.statusResult				= jsonResult.status;
+					if (self.largeUrlOperation.isJaas) {
+						console.log(" This Is JAASTestConnection Result"); 
+						self.jaas.status = jsonResult;
+						self.jaas.inprogress = "";
+					}
+					console.log(" isjaas= "+ self.largeUrlOperation.isJaas +" self.largeUrlOperation.statusResult="+angular.toJson( self.largeUrlOperation.statusResult) );
+				}
+			})
+			.error( function() {
+				// alert('an error occure');
+				});	
+		};
+	
 	
 });
 

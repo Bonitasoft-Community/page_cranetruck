@@ -77,10 +77,10 @@ public class Index implements PageController {
 		try {
 			String requestParamJson= request.getParameter("paramjson");
 			// in fact, the request is decoded by the Tomcat Server
-			// String requestParamJsonSt = (requestParamJson==null ? null : java.net.URLDecoder.decode(requestParamJson, "UTF-8"));
+			String requestParamJsonSt = (requestParamJson==null ? null : java.net.URLDecoder.decode(requestParamJson, "UTF-8"));
 
 			
-			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJson,  response, pageResourceProvider, pageContext );
+			Index.ActionAnswer actionAnswer = Actions.doAction( request, requestParamJsonSt,  response, pageResourceProvider, pageContext );
 			if (! actionAnswer.isManaged)
 			{
 				loggerCustomPage.info("#### CustomPage"+pageName+":Groovy NoAction, return index.html" );
