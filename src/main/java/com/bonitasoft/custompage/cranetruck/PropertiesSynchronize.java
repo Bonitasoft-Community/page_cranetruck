@@ -17,7 +17,14 @@ import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
 import com.bonitasoft.custompage.cranetruck.Toolbox.StatusOperation;
 import com.bonitasoft.ldapsynchronizer.data.LDAPSearchParameters;
 import com.bonitasoft.ldapsynchronizer.data.RawUserData;
+import com.bonitasoft.ldapsynchronizer.repository.BonitaUserRepository;
 import com.bonitasoft.ldapsynchronizer.repository.LDAPUserRepository;
+import com.bonitasoft.ldapsynchronizer.user.RawUserDataCollection;
+import com.bonitasoft.ldapsynchronizer.user.RawUserDataFactory;
+import com.bonitasoft.ldapsynchronizer.user.UserMappingConfiguration;
+import com.bonitasoft.ldapsynchronizer.util.SyncConfiguration;
+
+import me.tongfei.progressbar.ProgressBar;
 
 public class PropertiesSynchronize implements PropertiesParam {
 
@@ -363,10 +370,19 @@ public class PropertiesSynchronize implements PropertiesParam {
                 final String name = "WatchedDirectory " + i;
                 oneRecord.put("name", name);
                 try {
-                    final List<RawUserData> listRowData = LDAPUserRepository.getUsers(searchParameters);
+                    ProgressBar pb = new ProgressBar("LDAP Synchronization", 100);
+
+                    UserMappingConfiguration userMappingConfiguration = new UserMappingConfiguration( "default");
+                    BonitaUserRepository bonitaUserRepository = new BonitaUserRepository("default", pb);
+                    RawUserDataFactory rawUserDataFactory = new RawUserDataFactory(userMappingConfiguration, bonitaUserRepository,
+                            SyncConfiguration.getCustomUserInfoSyncPolicy());
+
+                    
+                    RawUserDataCollection listRowData = LDAPUserRepository.getUsers(searchParameters,rawUserDataFactory,pb);
                     oneRecord.put("size", listRowData.size());
-                    if (listRowData.size() > 0) {
-                        oneRecord.put("example", listRowData.get(0).getData());
+                    for (RawUserData rawData  : listRowData) {
+                        oneRecord.put("example", rawData.getData());
+                        break;
                     }
                 } catch (final Exception e) {
                     statusOperation.addError("Watched directory " + name + " : " + e.toString());
