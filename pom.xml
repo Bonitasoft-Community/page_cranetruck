@@ -6,9 +6,9 @@
    		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.bonitasoft.custompage</groupId>
-	<artifactId>CustomPageCraneTruck</artifactId>
-	<version>1.5.0</version>
+	<groupId>org.bonitasoft.custompage</groupId>
+	<artifactId>bonita-cranetruck</artifactId>
+	<version>1.5.1</version>
 	
 	<dependencies>
 		<dependency>
