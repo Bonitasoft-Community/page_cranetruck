@@ -84,10 +84,13 @@ public class Toolbox {
 
         public String mStatusTitle;
         public String mStatusinfo = "";
+        
+        // Error is the real status, synthetic one. ListEvent is here to complete the status 
         public String mStatusError = "";
-        public List<String> mStatusDetails = new ArrayList<String>();
-        public List<org.bonitasoft.log.event.BEvent> listEvents = new ArrayList<BEvent>();
-        public Map<String,Object> mAdditionalInfo = new HashMap<String,Object>();
+
+        private List<String> mStatusDetails = new ArrayList<>();
+        private List<BEvent> listEvents = new ArrayList<>();
+        private Map<String,Object> mAdditionalInfo = new HashMap<>();
 
         public StatusOperation(final String title) {
             mStatusTitle = title;
@@ -111,40 +114,37 @@ public class Toolbox {
             mStatusDetails.add( details );
         }
         
+        public void addEvent( BEvent event ) {
+            listEvents.add( event );
+            if (event.isError())
+                addError( event.getTitle()+":"+event.getParameters() );
+        }
         public void addAdditionalInfo(final String name, Object value) {
             mAdditionalInfo.put( name, value );
         }
         public void setSuccess(final String success) {
             mStatusinfo = success;
-
         }
 
         public void addStatusOperation(final StatusOperation statusOperation) {
             mStatusTitle += statusOperation.mStatusTitle + ";";
             mStatusinfo += statusOperation.mStatusinfo.length() > 0 ? statusOperation.mStatusinfo + ";" : "";
             mStatusError += statusOperation.mStatusError.length() > 0 ? statusOperation.mStatusError + ";" : "";
+            listEvents.addAll( statusOperation.listEvents);
+
             mStatusDetails.addAll( statusOperation.mStatusDetails);
-            if (statusOperation.mStatusError.length() > 0) {
-                logger.info(statusOperation.mStatusError);
-            }
         }
 
         public Map<String, Object> toMap() {
             // status.properties.error}
-            final Map<String, Object> result = new HashMap<String, Object>();
+            final Map<String, Object> result = new HashMap<>();
             result.put( "detailsjsonmap", mAdditionalInfo );
             result.put("title", mStatusTitle);
             result.put("info", mStatusinfo);
-            result.put("error", mStatusError);
             result.put("details", mStatusDetails);
+            result.put("error", mStatusError);
 
-            // transform the list of event to a Map for Json
-            final List<Map<String, Serializable>> listEventsJson = new ArrayList<Map<String, Serializable>>();
-            for (final BEvent event : listEvents) {
-                listEventsJson.add(event.getJson(true));
-            }
-            result.put("events", listEventsJson);
-            result.put("listeventshtml", BEventFactory.getHtml(listEvents));
+            result.put("listevents", BEventFactory.getSyntheticHtml(listEvents));
 
             return result;
 

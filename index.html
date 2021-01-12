@@ -12,17 +12,18 @@
     <title>Crane truck</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/animate.css" />
-    <link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/bootstrap.min.css">
-	<link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/main.css">
-	<link rel="stylesheet" href="pageResource?page=custompage_cranetruck&location=style/style.css">
+    <link rel="stylesheet" href="style/animate.css" />
+    <link rel="stylesheet" href="style/bootstrap.min.css">
+	<link rel="stylesheet" href="style/main.css">
+	<link rel="stylesheet" href="style/style.css">
  
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<!-- 
 	<script type="text/javascript" src="https://www.google.com/uds/?file=visualization&amp;v=1&amp;hl=fr&amp;packages=corechart&amp;async=2"></script>
 	<link type="text/css" href="https://www.google.com/uds/api/visualization/1.0/ff67c3772da186a412ae3231c32409e9/ui+fr.css" rel="stylesheet">
 	<script type="text/javascript" src="https://www.google.com/uds/api/visualization/1.0/ff67c3772da186a412ae3231c32409e9/format+fr,default+fr,ui+fr,corechart+fr.I.js"></script>
 	<link href="https://ajax.googleapis.com/ajax/static/modules/gviz/1.0/core/tooltip.css" rel="stylesheet" type="text/css">
-		
+		 -->
 	
 </head>
 <body ng-app="cranetruckmonitor">
@@ -31,7 +32,7 @@
 
 	<center>
 	<table><tr><td><h1>Crane Truck</h1></td><td rowspan="2"><img src="pageResource?page=custompage_cranetruck&location=img/cranetruck.jpg" width="150" heigth="150" /></td></tr>
-		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.5.0</a></td></tr>
+		<tr><td style="font-size:0.8em"> <a href="" ng-click="cranectrl.isshowhistory = ! cranectrl.isshowhistory;">V1.6.0</a></td></tr>
 		</div>
 	</table>
 	</center>
@@ -83,9 +84,10 @@
 		<button ng-click="cranectrl.testJaasConnection()"  class="btn btn-info btn-xs" >Test JAAS connection</button><br>
 		<span class="label label-success">{{cranectrl.jaas.inprogress}}</span><p>
 		<span class="label label-success">{{cranectrl.jaas.status.detailsjsonmap.status}}</span><p>
-		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
-		<span class="label label-danger">{{cranectrl.jaas.status.detailsjsonmap.error}}</span><p>
-	
+		<span class="label label-danger">{{cranectrl.jaas.status.error}}</span><p>
+		<div ng-bind-html="cranectrl.getListEvents(cranectrl.jaas.status.listevents )"></div>
+		
+			
 		<div class="panel panel-primary" ng-if="cranectrl.jaas.input.stepconnection">
 			<div class="panel-heading">Ldap Connection step by step</div>
 			<div class="panel-body">
@@ -147,6 +149,7 @@
 		</table>
 		<button ng-click="cranectrl.testLdaploginmodule()"  class="btn btn-info btn-xs" >Test LdapLoginModule parameters</button><br>
 			<span class="label label-success">{{cranectrl.ldaploginmodule.inprogress}}</span><p>
+			
 			
 			<table style="border:10px">
 			<tr >
@@ -287,9 +290,8 @@
 			<span class="label label-success">{{cranectrl.statusldap.inprogress}}</span><p>
 			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.connection}}</span><p>
 			<span class="label label-success">{{cranectrl.statusldap.detailsjsonmap.search}}</span><p>
-			<span class="label label-danger">{{cranectrl.statusldap.detailsjsonmap.error}}</span><p>
+			<span class="label label-danger">{{cranectrl.statusldap.error}}</span><p>
 
-			
 			</table>
 			<table class="table table-hover table-condensed table-bordered">
 			<tr>
@@ -597,18 +599,19 @@
 
 <!-- Third party dependencies -->
 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/jquery.min.js"></script>
+<script src="3rd-party/jquery.min.js"></script>
 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular.min.js"></script>
+<script src="3rd-party/angular.min.js"></script>
 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-resource.min.js"></script>
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-cookies.min.js"></script>
+<script src="3rd-party/angular-resource.min.js"></script>
+<script src="3rd-party/angular-cookies.min.js"></script>
 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/bootstrap/js/bootstrap.min.js"></script>
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-bootstrap-tpls.min.js"></script>
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-file-upload.js"></script> 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/ng-google-chart.js"></script> 
-<script src="pageResource?page=custompage_cranetruck&location=3rd-party/angular-sanitize.min.js"></script>
+<script src="3rd-party/bootstrap/js/bootstrap.min.js"></script>
+<script src="3rd-party/angular-bootstrap-tpls.min.js"></script>
+
+<script src="3rd-party/angular-file-upload.js"></script> 
+<script src="3rd-party/angular-sanitize.min.js"></script>
+
 
 <!-- Application dependencies -->
 <script src="pageResource?page=custompage_cranetruck&location=cranetruckmonitor.js&t=@_CURRENTTIMEMILIS_@"></script>

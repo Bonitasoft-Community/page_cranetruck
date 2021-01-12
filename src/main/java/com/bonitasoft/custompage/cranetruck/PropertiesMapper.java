@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -63,7 +64,7 @@ public class PropertiesMapper implements PropertiesParam {
     }
 
     private HashMap<String, String> getHashMap(final String bonitaName, final String example) {
-        final HashMap<String, String> record = new HashMap<String, String>();
+        final HashMap<String, String> record = new HashMap<>();
         record.put(MAPPING_BONITANAME, bonitaName);
         record.put(MAPPING_EXAMPLE, example);
         return record;
@@ -117,7 +118,7 @@ public class PropertiesMapper implements PropertiesParam {
      *
      */
     public Map<String, Object> toMap() {
-        final HashMap<String, Object> result = new HashMap<String, Object>();
+        final HashMap<String, Object> result = new HashMap<>();
 
         // format is "bonitaname: <key> ldapname:<key> example:<key>
 
@@ -201,9 +202,11 @@ public class PropertiesMapper implements PropertiesParam {
 
     public void addError(final String error) {
         mStatusOperation.mStatusError += error + ";";
-
     }
 
+    public void addEvent( BEvent event) {
+        mStatusOperation.addEvent(event);
+    }
     /***
      * check check the Ldap
      *
@@ -218,12 +221,12 @@ public class PropertiesMapper implements PropertiesParam {
     public StatusOperation checkLoggerConnection() {
         logger.info("Start checkLogger=" + toString());
 
-        final HashMap<String, Object> result = new HashMap<String, Object>();
+        final HashMap<String, Object> result = new HashMap<>();
         final StatusOperation statusOperation = getStatusOperation();
         if (statusOperation.isError()) {
             return statusOperation;
         }
-        final StringBuffer finalResult = new StringBuffer();
+        final StringBuilder finalResult = new StringBuilder();
         try {
             statusOperation.mStatusinfo = "OK";
             return statusOperation;

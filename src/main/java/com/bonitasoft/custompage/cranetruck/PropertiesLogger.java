@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -63,7 +64,7 @@ public class PropertiesLogger implements PropertiesParam {
      *
      */
     public Map<String, Object> toMap() {
-        final HashMap<String, Object> result = new HashMap<String, Object>();
+        final HashMap<String, Object> result = new HashMap<>();
         result.put("log_dir_path", mLogDirPath);
         result.put("log_file_date_prefix", mFileDatePrefix);
         result.put("log_level", mLogLevel);
@@ -142,7 +143,9 @@ public class PropertiesLogger implements PropertiesParam {
         mStatusOperation.addError(error);
 
     }
-
+    public void addEvent( BEvent event) {
+        mStatusOperation.addEvent(event);
+    }
     /***
      * check check the Ldap
      *

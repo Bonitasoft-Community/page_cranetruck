@@ -19,6 +19,7 @@ import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -27,7 +28,14 @@ import com.bonitasoft.custompage.cranetruck.Toolbox.StatusOperation;
 public class PropertiesLdapConnection implements PropertiesParam {
 
     static Logger logger = Logger.getLogger(PropertiesLdapConnection.class.getName());
-
+    
+    static final BEvent eventNoHost = new BEvent(PropertiesLdapConnection.class.getName(), 1, BEvent.Level.APPLICATIONERROR,
+            "No Host", "No LDAP Host is given, provide one", "Connection can't be executed", "Provide a LDAP Host");
+    static final BEvent eventIncorrectData = new BEvent(PropertiesLdapConnection.class.getName(), 2, BEvent.Level.ERROR,
+            "No Map", "Method expect information, which are not given", "Operation can't be executed", "Provide a MAP");
+    static final BEvent eventErrorDuringOperation = new BEvent(PropertiesLdapConnection.class.getName(), 3, BEvent.Level.ERROR,
+            "Error during operation", "An error arrived during the operation", "Operation can't be executed", "Check the exception");
+  
     public String mHostURL;
     public String mAuthType;
     public String mPrincipalDN;
@@ -54,10 +62,9 @@ public class PropertiesLdapConnection implements PropertiesParam {
      * @return
      */
     public StatusOperation checkErrors() {
-        mStatusOperation.mStatusError = "";
 
         if (mHostURL == null) {
-            mStatusOperation.mStatusError += "LdapConnection : Host is mandatory";
+            mStatusOperation.addEvent(eventNoHost);
         }
 
         return mStatusOperation;
@@ -73,11 +80,14 @@ public class PropertiesLdapConnection implements PropertiesParam {
                 + "] SearchDN[" + mSearchDN + "] searchFilter[" + mSearchFilter + "] UsePagedSearch[" + mUsepagedSearch + "] PageSize[" + mPageSize + "]";
     }
 
-    public void addError(final String error) {
+    public void addEvent( BEvent eventError) {
+        mStatusOperation.addEvent( eventError );
+
+    }
+    public void addError(String error) {
         mStatusOperation.mStatusError += error + ";";
 
     }
-
     /* ******************************************************************************** */
     /*                                                                                  */
     /* getinstance */
@@ -101,7 +111,7 @@ public class PropertiesLdapConnection implements PropertiesParam {
     public static PropertiesLdapConnection getInstanceFromMap(final Map<String, Object> map) {
         final PropertiesLdapConnection ldapConnectionParam = new PropertiesLdapConnection();
         if (map == null) {
-            ldapConnectionParam.mStatusOperation.mStatusError = "No parameters from the map";
+            ldapConnectionParam.mStatusOperation.addEvent( eventIncorrectData);
             return ldapConnectionParam;
         }
         ldapConnectionParam.readFromMap(map);
@@ -222,7 +232,7 @@ public class PropertiesLdapConnection implements PropertiesParam {
     /* ******************************************************************************** */
 
     public DirContext connect() throws NamingException {
-        final Hashtable<String, String> env = new Hashtable<String, String>();
+        final Hashtable<String, String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, mHostURL);
         env.put(Context.SECURITY_AUTHENTICATION, mAuthType);
@@ -251,13 +261,13 @@ public class PropertiesLdapConnection implements PropertiesParam {
         if (statusOperation.isError()) {
             return statusOperation;
         }
-        final StringBuffer finalResult = new StringBuffer();
+        final StringBuilder finalResult = new StringBuilder();
         try {
 
             final DirContext context = connect();
             finalResult.append("Connected");
             statusOperation.addAdditionalInfo("connection", "Connection correct");
-            final ArrayList<HashMap<String, Object>> resultSearch = new ArrayList<HashMap<String, Object>>();
+            final ArrayList<HashMap<String, Object>> resultSearch = new ArrayList<>();
 
             if (mSearchDN != null && mSearchDN.trim().length() > 0) {
                 final SearchControls constraints = new SearchControls();
@@ -266,7 +276,7 @@ public class PropertiesLdapConnection implements PropertiesParam {
 
                 final NamingEnumeration<SearchResult> results = context.search(mSearchDN, mSearchFilter, constraints);
                 while (results.hasMore()) {
-                    final HashMap<String, Object> oneRecord = new HashMap<String, Object>();
+                    final HashMap<String, Object> oneRecord = new HashMap<>();
                     final SearchResult searchResult = results.next();
                     final Attributes attributes = searchResult.getAttributes();
                     @SuppressWarnings("unchecked")
@@ -301,10 +311,12 @@ public class PropertiesLdapConnection implements PropertiesParam {
             logger.severe("LdapConnection:" + e.toString() + " detail: " + sw.toString());
 
             finalResult.append("Exception :" + e.toString());
-            statusOperation.mStatusError = "Exception " + e.toString();
-            statusOperation.addAdditionalInfo("error", "Exception " + e.toString());
+            statusOperation.addEvent( new BEvent( eventErrorDuringOperation, e, "Exception " + e.toString()));
             return statusOperation;
         }
     }
+
+
+  
 
 }

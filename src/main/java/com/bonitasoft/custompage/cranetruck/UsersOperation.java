@@ -109,7 +109,7 @@ public class UsersOperation {
         } catch (final Exception e) {
             logger.severe("GetUserList : " + e.toString());
             statusOperation.addAdditionalInfo("error", e.toString());
-            statusOperation.listEvents.add(new BEvent(eventListError, e, ""));
+            statusOperation.addEvent(new BEvent(eventListError, e, ""));
         }
 
         return statusOperation;
@@ -197,9 +197,9 @@ public class UsersOperation {
             statusOperation.addAdditionalInfo("statusfinal", statusFinal);
             if (numberOfError > 0) {
                 statusOperation.addAdditionalInfo("error", "Errors on " + statusFinal);
-                statusOperation.listEvents.add(new BEvent(eventOperationOnUsersFailed, statusFinal));
+                statusOperation.addEvent(new BEvent(eventOperationOnUsersFailed, statusFinal));
             } else {
-                statusOperation.listEvents.add(new BEvent(eventOperationOnUsersSuccess, statusSuccess));
+                statusOperation.addEvent(new BEvent(eventOperationOnUsersSuccess, statusSuccess));
             }
         } catch (final Exception e) {
             logger.severe("GetUserList : " + e.toString());

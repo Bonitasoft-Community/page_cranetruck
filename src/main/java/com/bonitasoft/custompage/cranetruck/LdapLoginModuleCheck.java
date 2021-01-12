@@ -33,8 +33,10 @@ public class LdapLoginModuleCheck {
 
     static final BEvent eventCalculAuthId = new BEvent(LdapLoginModuleCheck.class.getName(), 1, BEvent.Level.INFO,
             "Authentication Id", "The authentication information is recalculted using the login id");
+
     static final BEvent eventConnectionSuccessfull = new BEvent(LdapLoginModuleCheck.class.getName(), 2, BEvent.Level.SUCCESS,
             "Connection successfull", "The connection to the LDAP database is correct");
+
     static final BEvent eventCalculSearchBy = new BEvent(LdapLoginModuleCheck.class.getName(), 3, BEvent.Level.INFO,
             "Search By in the hierarchy", "The search operation is calculated, replaced the name by the login");
 
@@ -48,7 +50,10 @@ public class LdapLoginModuleCheck {
             "No User found", "No user was found by the search criteria and the login name");
 
     static final BEvent eventError = new BEvent(LdapLoginModuleCheck.class.getName(), 7, BEvent.Level.APPLICATIONERROR,
-            "Error LDAP", "An error arrive during the execution", "Check the message");
+            "Error LDAP", "An error arrive during the execution", "Operation can't be executed", "Check the message");
+
+    static final BEvent eventConnectionFailed = new BEvent(LdapLoginModuleCheck.class.getName(), 8, BEvent.Level.APPLICATIONERROR,
+            "Connection Failed", "The connection to the LDAP database failed", "Operation can't be executed", "Check the LDAP parameters");
 
     /* ******************************************************************************** */
     /*                                                                                  */
@@ -100,30 +105,31 @@ public class LdapLoginModuleCheck {
         final StatusOperation statusOperation = new StatusOperation("ldapLoginModule");
 
         SearchControls constraints = null;
-        final Hashtable<String, Object> ldapEnvironment = new Hashtable<String, Object>(9);
-        LdapContext ctx;
-        final Pattern USERNAME_PATTERN = Pattern.compile("\\{USERNAME\\}");
-
-        ldapEnvironment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        ldapEnvironment.put(Context.PROVIDER_URL, mUserProvider);
-        if (mUseSSL) {
-            ldapEnvironment.put(Context.SECURITY_PROTOCOL, "ssl");
-        } else {
-            ldapEnvironment.remove(Context.SECURITY_PROTOCOL);
-        }
-        final Matcher identityMatcher = USERNAME_PATTERN.matcher(mAuthIdentity);
-
-        final String id = replaceUsernameToken(identityMatcher, mAuthIdentity, mLogin);
-        statusOperation.listEvents.add(new BEvent(eventCalculAuthId, "Match [" + mAuthIdentity + "] with userName["
-                + mLogin + "] => Login:[" + id + "]"));
-
-        ldapEnvironment.put(Context.SECURITY_CREDENTIALS, mPassword);
-        ldapEnvironment.put(Context.SECURITY_PRINCIPAL, id);
-
         try {
+            Hashtable<String, Object> ldapEnvironment = new Hashtable<>();
+            LdapContext ctx;
+            final Pattern USERNAME_PATTERN = Pattern.compile("\\{USERNAME\\}");
+
+            ldapEnvironment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            ldapEnvironment.put(Context.PROVIDER_URL, mUserProvider==null ? "" : mUserProvider);
+            if (mUseSSL) {
+                ldapEnvironment.put(Context.SECURITY_PROTOCOL, "ssl");
+            } else {
+                ldapEnvironment.remove(Context.SECURITY_PROTOCOL);
+            }
+            if (mAuthIdentity !=null) {
+                final Matcher identityMatcher = USERNAME_PATTERN.matcher(mAuthIdentity);
+
+                final String id = replaceUsernameToken(identityMatcher, mAuthIdentity, mLogin);
+                statusOperation.addEvent(new BEvent(eventCalculAuthId, "Match [" + mAuthIdentity + "] with userName["
+                        + mLogin + "] => Login:[" + id + "]"));
+                ldapEnvironment.put(Context.SECURITY_PRINCIPAL, id==null ? "" : id);
+            }
+            ldapEnvironment.put(Context.SECURITY_CREDENTIALS, mPassword==null ? "": mPassword);
+
             // Connect to the LDAP server (using simple bind)
             ctx = new InitialLdapContext(ldapEnvironment, null);
-            statusOperation.listEvents.add(eventConnectionSuccessfull);
+            statusOperation.addEvent(eventConnectionSuccessfull);
 
             constraints = new SearchControls();
             constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -133,12 +139,12 @@ public class LdapLoginModuleCheck {
 
             final Matcher filterMatcher = USERNAME_PATTERN.matcher(mUserFilter);
             final String searchBy = replaceUsernameToken(filterMatcher, mUserFilter, mLogin);
-            statusOperation.listEvents.add(new BEvent(eventCalculSearchBy, "Match [" + mUserFilter + "] with userName["
+            statusOperation.addEvent(new BEvent(eventCalculSearchBy, "Match [" + mUserFilter + "] with userName["
                     + mLogin + "] => searchBy:[" + searchBy + "]"));
 
             final NamingEnumeration<SearchResult> results = ctx.search("", searchBy, constraints);
 
-            statusOperation.listEvents.add(new BEvent(eventSearchBySuccess, "Search success"));
+            statusOperation.addEvent(new BEvent(eventSearchBySuccess, "Search success"));
 
             // Extract the distinguished name of the user's entry
             // (Use the first entry if more than one is returned)
@@ -149,9 +155,9 @@ public class LdapLoginModuleCheck {
                 // available in JDK 1.5 and later.
                 // (can remove call to constraints.setReturningObjFlag)
                 final String userDN = ((Context) entry.getObject()).getNameInNamespace();
-                statusOperation.listEvents.add(new BEvent(eventFoundOneUser, "found userDn[" + userDN + "]"));
+                statusOperation.addEvent(new BEvent(eventFoundOneUser, "found userDn[" + userDN + "]"));
 
-                final StringBuffer theJaasContent = new StringBuffer();
+                final StringBuilder theJaasContent = new StringBuilder();
                 theJaasContent.append("BonitaAuthentication-1 {<br>");
                 theJaasContent.append("&nbsp;&nbsp;&nbsp;com.sun.security.auth.module.LdapLoginModule REQUIRED<br>");
                 theJaasContent.append("&nbsp;&nbsp;&nbsp;userProvider=\"" + mUserProvider + "\"<br>");
@@ -164,7 +170,7 @@ public class LdapLoginModuleCheck {
 
             } else {
 
-                statusOperation.listEvents.add(eventSearchNoResult);
+                statusOperation.addEvent(eventSearchNoResult);
                 statusOperation.setSuccess("Connection Success");
             }
         } catch (final Exception e) {
@@ -172,8 +178,8 @@ public class LdapLoginModuleCheck {
             e.printStackTrace(new PrintWriter(sw));
             final String exceptionDetails = sw.toString();
 
-            statusOperation.listEvents.add(new BEvent(eventError, "Exception " + e.toString() + "<br>" + exceptionDetails));
-            statusOperation.addError("Connection failed");
+            statusOperation.addEvent(new BEvent(eventConnectionFailed, "Exception " + e.toString() + "<br>" + exceptionDetails));
+
             logger.severe("Exception " + e.toString() + " at " + exceptionDetails);
         }
         return statusOperation;

@@ -44,16 +44,17 @@ public class JaasCheck {
 
     static Logger logger = Logger.getLogger(JaasCheck.class.getName());
 
-    static final BEvent eventEnvironnementError = new BEvent(JaasCheck.class.getName(), 1, BEvent.Level.ERROR,
-            "No file Error", "The JAAS file can't be read", "Check the path");
-    static final BEvent eventNoJaasEnvironnement = new BEvent(JaasCheck.class.getName(), 2, BEvent.Level.ERROR,
-            "No Jaas Environnement", "The JAAS Mechanism need to access a Java Environment", "Check the setenv.sh (Tomcat)");
+    static final BEvent eventEnvironnementError = new BEvent(JaasCheck.class.getName(), 1, BEvent.Level.APPLICATIONERROR,
+            "No file Error", "The JAAS file can't be read", "File can't be read", "Check the path");
+    static final BEvent eventNoJaasEnvironnement = new BEvent(JaasCheck.class.getName(), 2, BEvent.Level.APPLICATIONERROR,
+            "No Jaas Environnement", "The JAAS Mechanism need to access a Java Environment",  "File can't be read",  "Check the setenv.sh (Tomcat)");
 
-    static final BEvent eventNoJaasConfirgurationFound = new BEvent(JaasCheck.class.getName(), 3, BEvent.Level.ERROR,
-            "No Jaas File found", "The Environment Variable give a file name. No file exist", "Check the path");
+    static final BEvent eventNoJaasConfirgurationFound = new BEvent(JaasCheck.class.getName(), 3, BEvent.Level.APPLICATIONERROR,
+            "No Jaas File found", "The Environment Variable give a file name. No file exist",  "File can't be read",  "Check the path");
 
-    static final BEvent eventBadJaasStructure = new BEvent(JaasCheck.class.getName(), 4, BEvent.Level.ERROR,
+    static final BEvent eventBadJaasStructure = new BEvent(JaasCheck.class.getName(), 4, BEvent.Level.APPLICATIONERROR,
             "Bad Jaas Structure", "The JAAS file has a structure : it supposed to be KEY { source;source; }, and the brace is not detected",
+            "File can't be read", 
             "Check the structure");
 
     private static final String cstParamJaasFile = "jaasfile";
@@ -453,15 +454,14 @@ public class JaasCheck {
                 jaasFile = mJaasFile;
             }
             if (jaasFile == null) {
-                statusOperation.listEvents.add(new BEvent(eventNoJaasEnvironnement, "java.security.auth.login.config"));
+                statusOperation.addEvent(new BEvent(eventNoJaasEnvironnement, "java.security.auth.login.config"));
                 statusOperation.mStatusError = "No Jaas Configuration";
                 return statusOperation;
             }
 
             final String contentJaas = loadFile(jaasFile, this);
             if (contentJaas == null) {
-                statusOperation.listEvents.add(new BEvent(eventNoJaasConfirgurationFound, "File[" + jaasFile + "]"));
-                statusOperation.mStatusError = "No Jaas File File exists [" + jaasFile + "]";
+                statusOperation.addEvent(new BEvent(eventNoJaasConfirgurationFound, "File[" + jaasFile + "]"));
                 return statusOperation;
             }
             statusOperation.mStatusinfo += "Jaas configuration OK;";
@@ -481,9 +481,8 @@ public class JaasCheck {
             final int posBegBrace = jaasSource.indexOf("{");
             final int posEndBrace = jaasSource.indexOf("}");
             if (posBegBrace == -1 || posEndBrace == -1) {
-                statusOperation.listEvents.add(new BEvent(eventBadJaasStructure, (posBegBrace == -1 ? "{} expected;" : "")
+                statusOperation.addEvent(new BEvent(eventBadJaasStructure, (posBegBrace == -1 ? "{} expected;" : "")
                         + (posEndBrace == -1 ? "} expected" : "")));
-                statusOperation.mStatusError = "Bad Jaas Structure {} expected [" + jaasFile + "]";
                 return statusOperation;
 
             }
@@ -491,10 +490,10 @@ public class JaasCheck {
             logger.info("jaasSource = [" + jaasSource + "]");
 
             // now, parse all sources
-            final List<Map<String, Object>> statusJaasModule = new ArrayList<Map<String, Object>>();
+            final List<Map<String, Object>> statusJaasModule = new ArrayList<>();
             final StringTokenizer st = new StringTokenizer(jaasSource, ";");
             while (st.hasMoreTokens()) {
-                final Map<String, Object> oneJaasModule = new HashMap<String, Object>();
+                final Map<String, Object> oneJaasModule = new HashMap<>();
                 final String oneJaasSource = st.nextToken();
 
                 final StringTokenizer stModule = new StringTokenizer(oneJaasSource);
@@ -562,7 +561,7 @@ public class JaasCheck {
             statusOperation.mStatusinfo += "Status JAAS Module done;";
 
         } catch (final Exception e) {
-            statusOperation.listEvents.add(new BEvent(eventEnvironnementError, "file [" + contentFile + "] "));
+            statusOperation.addEvent(new BEvent(eventEnvironnementError, "file [" + contentFile + "] "));
         }
         if (temporaryFile != null) {
             temporaryFile.delete();

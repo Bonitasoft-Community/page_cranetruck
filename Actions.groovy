@@ -82,7 +82,7 @@ import com.bonitasoft.custompage.cranetruck.UsersOperation;
 
 public class Actions {
 
-	private static Logger logger= Logger.getLogger("org.bonitasoft.custompage.longboard.groovy");
+	private static Logger logger= Logger.getLogger("org.bonitasoft.custompage.cranetruck.groovy");
 	
 	
 	public static Index.ActionAnswer doAction(HttpServletRequest request, String paramJsonSt, HttpServletResponse response, PageResourceProvider pageResourceProvider, PageContext pageContext) {
@@ -93,13 +93,22 @@ public class Actions {
 		
 		try {
 			String action=request.getParameter("action");
-			logger.info("#### LongBoardCustomPage:Actions  action is["+action+"] !");
+			logger.info("#### CraneTruck:Actions  action is["+action+"] !");
 			if (action==null || action.length()==0 )
 			{
 				actionAnswer.isManaged=false;
-				logger.info("#### LongBoardCustomPage:Actions END No Actions");
+				logger.info("#### CraneTruck:Actions END No Actions");
 				return actionAnswer;
 			}
+            
+            //Make sure no action is executed if the CSRF protection is active and the request header is invalid
+            if (! TokenValidator.checkCSRFToken(request, response)) {
+                logger.severe("#### CraneTruck:Actions CheckCSRFToken failed");
+                actionAnswer.isResponseMap=false;
+                return actionAnswer;
+            }
+         
+                         
 			actionAnswer.isManaged=true;
 			HttpSession httpSession = request.getSession() ;
             
@@ -134,9 +143,11 @@ public class Actions {
 			      
 				BonitaProperties bonitaProperties = new BonitaProperties( pageResourceProvider, session.getTenantId() );
 	            listEvents.addAll( bonitaProperties.load() );
-	            bonitaProperties.put("ldapSynchronizerPath", craneTruckParam.ldapSynchronizerPath); 	            
-	            bonitaProperties.put("domain", craneTruckParam.domain); 	            
-	            listEvents.addAll( bonitaProperties.store() );
+                if (craneTruckParam.ldapSynchronizerPath !=null) {
+                    bonitaProperties.put("ldapSynchronizerPath", craneTruckParam.ldapSynchronizerPath); 	            
+                    bonitaProperties.put("domain", craneTruckParam.domain); 	            
+                    listEvents.addAll( bonitaProperties.store() );
+                }
 	            actionAnswer.responseMap.put("listevents", BEventFactory.getHtml(listEvents));
 	          	
 			    
@@ -231,7 +242,7 @@ public class Actions {
 			String exceptionDetails = sw.toString();
 			logger.severe("#### CraneTruck Exception ["+e.toString()+"] at "+exceptionDetails);
 			actionAnswer.isResponseMap=true;
-			actionAnswer.responseMap.put("Error", "CraneTruck Exception ["+e.toString()+"] at "+exceptionDetails);
+			actionAnswer.responseMap.put("error", "CraneTruck Exception ["+e.toString()+"] at "+exceptionDetails);
 			return actionAnswer;
 		}
 	}

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -11,8 +12,11 @@ import com.bonitasoft.custompage.cranetruck.Toolbox.StatusOperation;
 
 public class CraneTruckAccess {
 
-    static Logger logger = Logger.getLogger(PropertiesBonitaConnection.class.getName());
+    static Logger logger = Logger.getLogger(CraneTruckAccess.class.getName());
 
+    static final BEvent eventIncorrectData = new BEvent(CraneTruckAccess.class.getName(), 1, BEvent.Level.ERROR,
+            "No Parameters", "Method expect information, which are not given", "Operation can't be executed", "Provide parameters");
+ 
     public static class CraneTruckParam {
 
         String ldapSynchronizerPath;

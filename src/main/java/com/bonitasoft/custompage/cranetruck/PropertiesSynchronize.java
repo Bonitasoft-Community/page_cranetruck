@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import javax.naming.directory.DirContext;
 
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -28,18 +29,18 @@ import me.tongfei.progressbar.ProgressBar;
 
 public class PropertiesSynchronize implements PropertiesParam {
 
-    static Logger logger = Logger.getLogger(PropertiesLdapConnection.class.getName());
+    static Logger logger = Logger.getLogger(PropertiesSynchronize.class.getName());
 
     private String mErrorLevelUponFaillingToGetRelatedUser;
-    private List<Map<String, String>> mListWatchedDir = new ArrayList<Map<String, String>>();
+    private List<Map<String, String>> mListWatchedDir = new ArrayList<>();
     private String mBonitaUserNameCase;
     private String mBonitaNoSyncUser;
     private String mBonitaRemoveUser;
     private String mBonitaDeactivateUsers;
     private String mBonitaUserRole;
     private Boolean mAllowRecursiveGroups;
-    private List<Map<String, String>> mListGroups = new ArrayList<Map<String, String>>();
-    private List<Map<String, String>> mLdapSearchFilterGroup = new ArrayList<Map<String, String>>();
+    private List<Map<String, String>> mListGroups = new ArrayList<>();
+    private List<Map<String, String>> mLdapSearchFilterGroup = new ArrayList<>();
 
     private final StatusOperation mStatusOperation;
 
@@ -280,7 +281,9 @@ public class PropertiesSynchronize implements PropertiesParam {
 
     public void addError(final String error) {
         mStatusOperation.mStatusError += error + ";";
-
+    }
+    public void addEvent( BEvent event) {
+        mStatusOperation.addEvent(event);
     }
 
     /* ******************************************************************************** */
@@ -351,7 +354,7 @@ public class PropertiesSynchronize implements PropertiesParam {
             return statusOperation;
         }
 
-        final StringBuffer synthesis = new StringBuffer();
+        final StringBuilder synthesis = new StringBuilder();
        
         try {
             statusOperation.mStatusinfo = "OK";

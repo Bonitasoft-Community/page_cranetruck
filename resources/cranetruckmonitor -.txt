@@ -6,7 +6,7 @@
 (function() {
 
 
-var appCommand = angular.module('cranetruckmonitor', [, 'ui.bootstrap','ngSanitize', 'ngCookies']);
+var appCommand = angular.module('cranetruckmonitor', ['googlechart', 'ui.bootstrap','ngSanitize', 'ngCookies']);
 
 
 
@@ -47,7 +47,7 @@ appCommand.controller('CraneTruckController',
 
 	this.getHttpConfig = function () {
 		var additionalHeaders = {};
-		var csrfToken = $cookies.get('X-Bonita-API-Token');
+		var csrfToken = $cookies['X-Bonita-API-Token'];
 		if (csrfToken) {
 			additionalHeaders ['X-Bonita-API-Token'] = csrfToken;
 		}
@@ -108,18 +108,12 @@ appCommand.controller('CraneTruckController',
 		if (this.domain != null) {
 			this.data.domain = this.domain;
 		};
-		console.log("updateValueFromPage :"+angular.toJson(this.data.sync, false));
 		
-		if ( this.data.ldap.used_paged_search_list )
-			this.data.ldap.used_paged_search 											= this.data.ldap.used_paged_search_list.value;
-		if (this.data.logger.log_level_list)
-			this.data.logger.log_level 															= this.data.logger.log_level_list.value;
-		if ( this.data.sync.bonita_username_case_list)
-			this.data.sync.bonita_username_case 										= this.data.sync.bonita_username_case_list.value;
-		if ( this.data.sync.error_level_upon_failing_to_get_related_user_list)
-			this.data.sync.error_level_upon_failing_to_get_related_user = this.data.sync.error_level_upon_failing_to_get_related_user_list.value;
-		if (this.data.sync.bonita_deactivate_users_list)
-			this.data.sync.bonita_deactivate_users 									= this.data.sync.bonita_deactivate_users_list.value;
+		this.data.ldap.used_paged_search = this.data.ldap.used_paged_search_list.value;
+		this.data.logger.log_level = this.data.logger.log_level_list.value;
+		this.data.sync.bonita_username_case = this.data.sync.bonita_username_case_list.value;
+		this.data.sync.error_level_upon_failing_to_get_related_user = this.data.sync.error_level_upon_failing_to_get_related_user_list.value;
+		this.data.sync.bonita_deactivate_users = this.data.sync.bonita_deactivate_users_list.value;
 
 	};
 	this.writeProperties = function() {
@@ -159,19 +153,18 @@ appCommand.controller('CraneTruckController',
 	this.ldaptest = {};
 	this.testLdapConnection = function()
 	{
+		this.statusldap.inprogress ="...connection in progress...";		
 		var self=this;
 		this.updateValueFromPage();
-		this.statusldap.inprogress ="...connection in progress...";		
 		var json= encodeURI( angular.toJson(this.data.ldap, false));
 
 		$http.get( '?page=custompage_cranetruck&action=testldapconnection&paramjson='+json+'&t='+Date.now(), this.getHttpConfig() )
 				.success( function ( jsonResult ) {
 						console.log("result",jsonResult);
-						self.statusldap.inprogress ="";	
-						self.statusldap		= jsonResult;
+						self.statusldap	= jsonResult;
 						self.ldaptest			= jsonResult.detailsjsonmap;
 						
-							
+						self.statusldap.inprogress ="";		
 				})
 				.error( function() {
 					alert('Error while test LDAP connection');

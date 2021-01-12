@@ -16,6 +16,7 @@ import org.bonitasoft.engine.platform.LoginException;
 import org.bonitasoft.engine.platform.PlatformLoginException;
 import org.bonitasoft.engine.session.APISession;
 import org.bonitasoft.engine.session.PlatformSession;
+import org.bonitasoft.log.event.BEvent;
 import org.json.simple.JSONValue;
 
 import com.bonitasoft.custompage.cranetruck.ToolFileProperties.PropertiesParam;
@@ -130,6 +131,9 @@ public class PropertiesBonitaConnection implements PropertiesParam {
 
     }
 
+    public void addEvent( BEvent event) {
+        mStatusOperation.addEvent(event);
+    }
     public StatusOperation checkErrors() {
         mStatusOperation.mStatusError = "";
         if (mTechnicalUser == null) {

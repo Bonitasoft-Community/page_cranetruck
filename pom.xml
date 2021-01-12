@@ -8,7 +8,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bonitasoft.custompage</groupId>
 	<artifactId>bonita-cranetruck</artifactId>
-	<version>1.5.1</version>
+	<version>1.6.0</version>
 	
 	<dependencies>
 		<dependency>

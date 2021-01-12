@@ -18,6 +18,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
+import org.bonitasoft.log.event.BEvent;
+
 import com.bonitasoft.custompage.cranetruck.Toolbox.StatusOperation;
 
 /**
@@ -108,8 +110,10 @@ public class ToolFileProperties extends java.util.Properties {
 
         public String getPropertiesFileName();
 
+        public void addEvent(BEvent event);
+        
         public void addError(String error);
-
+        
         public StatusOperation getStatusOperation();
 
         public String getTitle();
